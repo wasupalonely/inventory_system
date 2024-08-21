@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
+import { ConfigModule } from '@nestjs/config';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SupermarketModule } from './supermarket/supermarket.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -17,6 +20,7 @@ import { SupermarketModule } from './supermarket/supermarket.module';
       synchronize: true, // En producción, usa migraciones en lugar de synchronize
     }),
     SupermarketModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
