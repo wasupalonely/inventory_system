@@ -1,20 +1,27 @@
-import { PartialType } from "@nestjs/swagger";
-import { IsEmail, IsString, Max, Min } from "class-validator";
+import { PartialType } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Role } from 'src/shared/enums/roles.enum';
 
 export class CreateUserDto {
-    @IsString()
-    name: string;
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-    @IsEmail()
-    email: string;
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 
-    @IsString()
-    phoneNumber: string;
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
 
-    @IsString()
-    @Max(20)
-    @Min(6)
-    password: string;
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+
+  @IsString()
+  @IsOptional()
+  role: Role;
 }
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {}

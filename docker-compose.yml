@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
   db:
-    image: postgres:15
+    image: postgres:14
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
@@ -17,6 +17,7 @@ services:
     ports:
       - '2805:3000'
     environment:
+    
       DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_USER: root
