@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from 'src/user/dto/user.dto';
 import { UserService } from 'src/user/user.service';
-import { LoginAuthDto } from './dto/LoginAuth.dto';
+import { LoginAuthDto } from './dto/login.dto';
 import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
@@ -41,6 +41,10 @@ export class AuthService {
   }
 
   async register(userDto: CreateUserDto) {
+    if (await this.usersService.getUserByIdentifier(userDto.email)) {
+      throw new BadRequestException('User already exists');
+    }
+
     userDto.password = bcrypt.hashSync(userDto.password, 10);
     const user = await this.usersService.create(userDto);
     return this.login(user);

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import customMessage from '../responses/customMessage.response';
-import { LoginAuthDto } from 'src/auth/dto/LoginAuth.dto';
+import { LoginAuthDto } from 'src/auth/dto/login.dto';
 
 @UsePipes(ValidationPipe)
 @Injectable()
