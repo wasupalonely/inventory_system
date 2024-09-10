@@ -27,7 +27,7 @@ export class AuthService {
     const userValidation = await this.validateUser(user.email, user.password);
 
     if (!userValidation) {
-      throw new BadRequestException('Invalid credentials');
+      throw new BadRequestException('Invalid credentials for login');
     }
 
     const payload = {
@@ -41,12 +41,20 @@ export class AuthService {
   }
 
   async register(userDto: CreateUserDto) {
-    if (await this.usersService.getUserByIdentifier(userDto.email)) {
+    const userValidation = await this.usersService.validateUserExistence(
+      userDto.email,
+    );
+    console.log(
+      '🚀 ~ AuthService ~ register ~ userValidation:',
+      userValidation,
+    );
+    if (userValidation) {
       throw new BadRequestException('User already exists');
     }
 
     userDto.password = bcrypt.hashSync(userDto.password, 10);
     const user = await this.usersService.create(userDto);
-    return this.login(user);
+    const userWithoutPassword = { ...user, password: undefined };
+    return userWithoutPassword;
   }
 }
