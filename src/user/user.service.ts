@@ -20,6 +20,11 @@ export class UserService {
     return user;
   }
 
+  async validateUserExistence(identifier: string): Promise<boolean> {
+    const user = await this.userRepo.findOne({ where: { email: identifier } });
+    return !!user;
+  }
+
   async getUserByIdentifier(identifier: string): Promise<User> {
     const user = await this.userRepo.findOne({ where: { email: identifier } });
     if (!user) {

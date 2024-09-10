@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'src/shared/enums/roles.enum';
+import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -44,6 +47,12 @@ export class User {
   })
   @Column()
   password: string;
+
+  @ManyToOne(() => Supermarket, (supermarket) => supermarket.users)
+  supermarket: Supermarket;
+
+  @OneToOne(() => Supermarket, (supermarket) => supermarket.owner)
+  ownedSupermarket: Supermarket;
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
