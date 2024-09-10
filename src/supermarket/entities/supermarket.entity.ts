@@ -7,6 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { Address } from './address.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -28,10 +29,18 @@ export class Supermarket {
   name: string;
 
   @OneToOne(() => Address, (address) => address.supermarket)
+  @JoinColumn()
   address: Address;
+
+  @OneToOne(() => User, (user) => user.ownedSupermarket)
+  @JoinColumn()
+  owner: User;
 
   @OneToMany(() => User, (user) => user.supermarket)
   users: User[];
+
+  @Column({ default: false })
+  cronjobEnabled: boolean;
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',

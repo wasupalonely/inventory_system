@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -49,6 +50,9 @@ export class User {
 
   @ManyToOne(() => Supermarket, (supermarket) => supermarket.users)
   supermarket: Supermarket;
+
+  @OneToOne(() => Supermarket, (supermarket) => supermarket.owner)
+  ownedSupermarket: Supermarket;
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',

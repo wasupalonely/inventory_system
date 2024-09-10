@@ -1,12 +1,11 @@
 import { PartialType } from '@nestjs/swagger';
-
-export class CreateSupermarketDto {
-  name: string;
-  userId: number;
-  address: CreateAddressDto;
-}
-
-export class UpdateSupermarketDto extends PartialType(CreateSupermarketDto) {}
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateAddressDto {
   street: string;
@@ -16,3 +15,22 @@ export class CreateAddressDto {
   state: string;
   zipCode?: string;
 }
+
+export class CreateSupermarketDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  ownerId: number;
+
+  @IsNotEmpty()
+  address: CreateAddressDto;
+
+  @IsOptional()
+  @IsBoolean()
+  cronjobEnabled: boolean;
+}
+
+export class UpdateSupermarketDto extends PartialType(CreateSupermarketDto) {}
