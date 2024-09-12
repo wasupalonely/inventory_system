@@ -10,6 +10,13 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
 import { UserService } from 'src/user/user.service';
 import { Address } from './entities/address.entity';
+import * as moment from 'moment';
+import { HttpService } from '@nestjs/axios';
+import { lastValueFrom } from 'rxjs';
+// import * as fs from 'fs';
+// import * as path from 'path';
+import * as FormData from 'form-data';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class SupermarketService implements OnModuleInit {
@@ -20,6 +27,7 @@ export class SupermarketService implements OnModuleInit {
     private addressRepo: Repository<Address>,
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly userService: UserService,
+    private readonly httpService: HttpService,
   ) {}
 
   async onModuleInit() {
@@ -54,7 +62,10 @@ export class SupermarketService implements OnModuleInit {
     supermarketId: number,
     cronjobEnabled: boolean,
   ): Promise<void> {
-    await this.supermarketRepo.update(supermarketId, { cronjobEnabled });
+    await this.supermarketRepo.update(supermarketId, {
+      cronjobEnabled,
+      startTime: new Date(),
+    });
     if (cronjobEnabled) {
       this.startCronJob(supermarketId);
     } else {
@@ -62,13 +73,27 @@ export class SupermarketService implements OnModuleInit {
     }
   }
 
-  private startCronJob(supermarketId: number) {
-    const job = new CronJob('* * * * *', async () => {
-      // Lógica del cronjob que se ejecuta cada hora
+  async startCronJob(supermarketId: number) {
+    const supermarket = await this.getSupermarket(supermarketId);
+    console.log(
+      '🚀 ~ SupermarketService ~ startCronJob ~ supermarket:',
+      supermarket,
+    );
+
+    const startTime = moment(supermarket.startTime);
+
+    // HORA
+    // const cronExpression = `${startTime.seconds()} ${startTime.minutes()} ${startTime.hours()} * * *`;
+
+    // MINUTO PARA TEST
+    const cronExpression = `${startTime.seconds()} * * * * *`;
+
+    const job = new CronJob(cronExpression, async () => {
       console.log(
-        `Cronjob ejecutado para el supermercado con ID: ${supermarketId}`,
+        `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
       );
-      // Aquí podrías implementar la lógica de obtener la imagen y enviarla a FastAPI
+      const response = await this.callFastApi(supermarketId);
+      console.log('🚀 ~ SupermarketService ~ job ~ response:', response);
     });
 
     this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);
@@ -115,5 +140,34 @@ export class SupermarketService implements OnModuleInit {
 
   async deleteSupermarket(id: number): Promise<void> {
     await this.supermarketRepo.delete(id);
+  }
+
+  private async callFastApi(supermarketId: number): Promise<any> {
+    const apiUrl = 'http://localhost:8000/predict/';
+
+    // console.log('🚀 ~ SupermarketService ~ callFastApi ~ apiUrl:', __dirname);
+
+    // const imagePath = path.resolve(__dirname, '..', 'images', 'R.jpeg');
+    // const imageBuffer = fs.readFileSync(imagePath);
+
+    const formData = new FormData();
+    formData.append('supermarketId', supermarketId.toString());
+    // formData.append('image', imageBuffer, {
+    //   filename: 'R.jpeg',
+    //   contentType: 'image/jpeg',
+    // });
+
+    try {
+      const response: AxiosResponse = await lastValueFrom(
+        this.httpService.post(apiUrl, formData, {
+          headers: formData.getHeaders(),
+        }),
+      );
+      console.log('Response from FastAPI:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error calling FastAPI:', error);
+      throw error;
+    }
   }
 }

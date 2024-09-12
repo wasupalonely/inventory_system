@@ -42,6 +42,9 @@ export class Supermarket {
   @Column({ default: false })
   cronjobEnabled: boolean;
 
+  @Column({ type: 'timestamp', nullable: true })
+  startTime: Date;
+
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
     description: 'Supermarket creation date',
