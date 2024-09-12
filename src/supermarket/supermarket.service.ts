@@ -13,6 +13,10 @@ import { Address } from './entities/address.entity';
 import * as moment from 'moment';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+// import * as fs from 'fs';
+// import * as path from 'path';
+import * as FormData from 'form-data';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class SupermarketService implements OnModuleInit {
@@ -88,7 +92,8 @@ export class SupermarketService implements OnModuleInit {
       console.log(
         `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
       );
-      // Aquí podrías implementar la lógica de obtener la imagen y enviarla a FastAPI
+      const response = await this.callFastApi(supermarketId);
+      console.log('🚀 ~ SupermarketService ~ job ~ response:', response);
     });
 
     this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);
@@ -137,14 +142,32 @@ export class SupermarketService implements OnModuleInit {
     await this.supermarketRepo.delete(id);
   }
 
-  private async callFastApi(supermarketId: number) {
+  private async callFastApi(supermarketId: number): Promise<any> {
     const apiUrl = 'http://localhost:8000/predict/';
 
-    const imageData = { supermarketId };
+    // console.log('🚀 ~ SupermarketService ~ callFastApi ~ apiUrl:', __dirname);
 
-    const response$ = this.httpService.post(apiUrl, imageData);
-    const response = await lastValueFrom(response$);
+    // const imagePath = path.resolve(__dirname, '..', 'images', 'R.jpeg');
+    // const imageBuffer = fs.readFileSync(imagePath);
 
-    return response.data;
+    const formData = new FormData();
+    formData.append('supermarketId', supermarketId.toString());
+    // formData.append('image', imageBuffer, {
+    //   filename: 'R.jpeg',
+    //   contentType: 'image/jpeg',
+    // });
+
+    try {
+      const response: AxiosResponse = await lastValueFrom(
+        this.httpService.post(apiUrl, formData, {
+          headers: formData.getHeaders(),
+        }),
+      );
+      console.log('Response from FastAPI:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error calling FastAPI:', error);
+      throw error;
+    }
   }
 }
