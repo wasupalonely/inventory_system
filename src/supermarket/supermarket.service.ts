@@ -92,8 +92,9 @@ export class SupermarketService implements OnModuleInit {
       console.log(
         `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
       );
-      const response = await this.callFastApi(supermarketId);
-      console.log('🚀 ~ SupermarketService ~ job ~ response:', response);
+      // Working on this
+      // const response = await this.callFastApi(supermarketId);
+      // console.log('🚀 ~ SupermarketService ~ job ~ response:', response);
     });
 
     this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);
