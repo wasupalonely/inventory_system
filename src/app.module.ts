@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SupermarketModule } from './supermarket/supermarket.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { ProductsModule } from './products/products.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { AuthModule } from './auth/auth.module';
     SupermarketModule,
     UserModule,
     AuthModule,
+    ProductsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

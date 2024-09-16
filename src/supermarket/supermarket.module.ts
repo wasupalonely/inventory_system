@@ -17,5 +17,6 @@ import { HttpModule } from '@nestjs/axios';
   ],
   controllers: [SupermarketController],
   providers: [SupermarketService],
+  exports: [SupermarketService],
 })
 export class SupermarketModule {}

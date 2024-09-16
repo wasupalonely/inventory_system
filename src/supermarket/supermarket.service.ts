@@ -101,11 +101,14 @@ export class SupermarketService implements OnModuleInit {
     job.start();
   }
 
-  private stopCronJob(supermarketId: number) {
+  private async stopCronJob(supermarketId: number) {
     const job = this.schedulerRegistry.getCronJob(
       `supermarketCron-${supermarketId}`,
     );
     if (job) {
+      await this.supermarketRepo.update(supermarketId, {
+        startTime: null,
+      });
       job.stop();
       this.schedulerRegistry.deleteCronJob(`supermarketCron-${supermarketId}`);
     }

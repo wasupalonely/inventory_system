@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Address } from './address.entity';
 import { User } from 'src/user/entities/user.entity';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Entity({ name: 'supermarket' })
 export class Supermarket {
@@ -35,6 +36,9 @@ export class Supermarket {
   @OneToOne(() => User, (user) => user.ownedSupermarket)
   @JoinColumn()
   owner: User;
+
+  @OneToMany(() => Category, (category) => category.supermarket)
+  categories: Category[];
 
   @OneToMany(() => User, (user) => user.supermarket)
   users: User[];
