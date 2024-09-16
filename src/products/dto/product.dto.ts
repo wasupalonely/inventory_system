@@ -16,7 +16,7 @@ export class CreateProductDto {
 
     @IsNumber()
     @IsPositive()
-    @IsNotEmpty()
+    @IsOptional()
     quantity: number;
 
     @IsNumber()
