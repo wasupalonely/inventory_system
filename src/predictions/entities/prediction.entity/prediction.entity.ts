@@ -1,9 +1,14 @@
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-
-@Entity('predictions') 
-export class PredictionEntity {
+@Entity('predictions')
+export class Prediction {
   @PrimaryGeneratedColumn()
   id: number;
 

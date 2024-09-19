@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { SupermarketController } from './supermarket.controller';
 import { SupermarketService } from './supermarket.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,7 +12,7 @@ import { HttpModule } from '@nestjs/axios';
   imports: [
     TypeOrmModule.forFeature([Supermarket, Address]),
     ScheduleModule.forRoot(),
-    UserModule,
+    forwardRef(() => UserModule),
     HttpModule,
   ],
   controllers: [SupermarketController],

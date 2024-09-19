@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -66,7 +67,7 @@ export class SupermarketController {
 
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
-  @Post(':id')
+  @Delete(':id')
   @ApiResponse({ status: 204 })
   @ApiResponse({ status: 404, description: 'Supermarket not found' })
   deleteSupermarket(@Param('id') id: number) {

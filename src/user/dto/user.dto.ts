@@ -2,6 +2,7 @@ import { ApiProperty, PartialType } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Length,
@@ -24,6 +25,22 @@ export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  supermarketId: number;
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  ownedSupermarketId: number;
 
   @ApiProperty({
     example: '1234567890',

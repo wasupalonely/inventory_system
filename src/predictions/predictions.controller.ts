@@ -1,7 +1,6 @@
 import { Body, Controller, Param, Post, Put } from '@nestjs/common';
-import { CreatePredictionDto } from '../dto/create-prediction.dto';
-import { UpdatePredictionDto } from '../dto/update-prediction.dto/update-prediction.dto';
 import { PredictionsService } from './predictions.service';
+import { CreatePredictionDto, UpdatePredictionDto } from './dto/prediction.dto';
 
 @Controller('predictions')
 export class PredictionsController {
@@ -15,7 +14,10 @@ export class PredictionsController {
 
   // Actualizar una predicción existente
   @Put(':id')
-  update(@Param('id') id: number, @Body() updatePredictionDto: UpdatePredictionDto) {
+  update(
+    @Param('id') id: number,
+    @Body() updatePredictionDto: UpdatePredictionDto,
+  ) {
     return this.predictionsService.update(id, updatePredictionDto);
   }
 }
