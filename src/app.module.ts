@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { CategoriesModule } from './categories/categories.module';
+import { PredictionsModule } from './predictions/predictions.module';
+import { ProductsModule } from './products/products.module';
+import { SalesModule } from './sales/sales.module';
 import { SupermarketModule } from './supermarket/supermarket.module';
 import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
-import { ProductsModule } from './products/products.module';
-import { CategoriesModule } from './categories/categories.module';
-import { SalesModule } from './sales/sales.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { SalesModule } from './sales/sales.module';
     SupermarketModule,
     UserModule,
     AuthModule,
+    PredictionsModule,
     ProductsModule,
     CategoriesModule,
     SalesModule,
