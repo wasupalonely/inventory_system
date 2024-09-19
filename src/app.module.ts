@@ -5,7 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
-import { PredictionsModule } from './predictions/predictions.module';
+// import { PredictionsModule } from './predictions/predictions.module';
 import { ProductsModule } from './products/products.module';
 import { SalesModule } from './sales/sales.module';
 import { SupermarketModule } from './supermarket/supermarket.module';
@@ -34,7 +34,7 @@ import { UserModule } from './user/user.module';
     SupermarketModule,
     UserModule,
     AuthModule,
-    PredictionsModule,
+    // PredictionsModule,
     ProductsModule,
     CategoriesModule,
     SalesModule,
