@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import { Repository } from 'typeorm';
-import { CreatePredictionDto } from '../dto/CreatePredictionDto/create-prediction.dto';
+import { CreatePredictionDto } from '../dto/create-prediction.dto';
 import { UpdatePredictionDto } from '../dto/update-prediction.dto/update-prediction.dto';
-import { PredictionEntity } from '../entities/prediction.entity/prediction.entity';
+import { PredictionEntity } from './entities/prediction.entity/prediction.entity';
 
 @Injectable()
 export class PredictionsService {

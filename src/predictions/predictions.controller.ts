@@ -1,5 +1,5 @@
 import { Body, Controller, Param, Post, Put } from '@nestjs/common';
-import { CreatePredictionDto } from '../dto/CreatePredictionDto/create-prediction.dto';
+import { CreatePredictionDto } from '../dto/create-prediction.dto';
 import { UpdatePredictionDto } from '../dto/update-prediction.dto/update-prediction.dto';
 import { PredictionsService } from './predictions.service';
 
