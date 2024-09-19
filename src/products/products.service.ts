@@ -39,7 +39,9 @@ export class ProductsService {
     const category = await this.categoryService.findOne(product.categoryId);
 
     if (!category) {
-      throw new NotFoundException(`Category with ID ${product.categoryId} not found`);
+      throw new NotFoundException(
+        `Category with ID ${product.categoryId} not found`,
+      );
     }
 
     const supermarket = await this.supermarketService.getSupermarket(

@@ -33,7 +33,7 @@ export class CategoriesService {
       category.supermarketId,
     );
 
-    console.log("SUPERMARKET", supermarket)
+    console.log('SUPERMARKET', supermarket);
 
     if (!supermarket) {
       throw new NotFoundException(
@@ -55,9 +55,9 @@ export class CategoriesService {
     }
 
     const categoryCreated = await this.categoryRepo.create({
-        ...category,
-        supermarket
-    })
+      ...category,
+      supermarket,
+    });
 
     return await this.categoryRepo.save(categoryCreated);
   }
