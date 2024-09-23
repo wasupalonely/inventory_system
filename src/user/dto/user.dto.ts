@@ -1,5 +1,12 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 import { Role } from 'src/shared/enums/roles.enum';
 
 export class CreateUserDto {
@@ -20,6 +27,22 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  supermarketId: number;
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  ownedSupermarketId: number;
+
+  @ApiProperty({
     example: '1234567890',
     required: true,
   })
@@ -33,6 +56,7 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
+  @Length(9, 20)
   password: string;
 
   @ApiProperty({ example: 'viewer' })

@@ -54,7 +54,6 @@ export class AuthService {
 
     userDto.password = bcrypt.hashSync(userDto.password, 10);
     const user = await this.usersService.create(userDto);
-    const userWithoutPassword = { ...user, password: undefined };
-    return userWithoutPassword;
+    return user;
   }
 }
