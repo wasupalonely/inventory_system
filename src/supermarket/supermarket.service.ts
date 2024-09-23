@@ -35,9 +35,9 @@ export class SupermarketService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const { Client } = await importDynamic('@gradio/client');
+    // const { Client } = await importDynamic('@gradio/client');
 
-    this.app = await Client.connect('aicafee/fresh_vs_old_meat');
+    // this.app = await Client.connect('aicafee/fresh_vs_old_meat');
     const supermarkets = await this.findAllWithCronEnabled();
 
     supermarkets.forEach((supermarket) => {
@@ -81,7 +81,7 @@ export class SupermarketService implements OnModuleInit {
   }
 
   async startCronJob(supermarketId: number) {
-    const { handle_file } = await importDynamic('@gradio/client');
+    // const { handle_file } = await importDynamic('@gradio/client');
     const supermarket = await this.getSupermarket(supermarketId);
     console.log(
       '🚀 ~ SupermarketService ~ startCronJob ~ supermarket:',
@@ -101,16 +101,16 @@ export class SupermarketService implements OnModuleInit {
         `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
       );
 
-      const response_0 = await fetch(
-        'https://raw.githubusercontent.com/gradio-app/gradio/main/test/test_files/bus.png',
-      );
-      const exampleImage = await response_0.blob();
+      // const response_0 = await fetch(
+      //   'https://raw.githubusercontent.com/gradio-app/gradio/main/test/test_files/bus.png',
+      // );
+      // const exampleImage = await response_0.blob();
 
-      const prediction = await this.app.predict('/predict', [
-        handle_file(exampleImage),
-      ]);
+      // const prediction = await this.app.predict('/predict', [
+      //   handle_file(exampleImage),
+      // ]);
 
-      console.log('PREDICTION ---->', prediction.data);
+      // console.log('PREDICTION ---->', prediction.data);
 
       // Working on this
       // const response = await this.callFastApi(supermarketId);

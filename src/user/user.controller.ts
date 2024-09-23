@@ -23,12 +23,14 @@ import { User } from './entities/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Roles(Role.Admin)
   @Get()
   @ApiResponse({ status: 200, type: [User] })
   getUsers() {
     return this.userService.getUsers();
   }
 
+  @Roles(Role.Admin)
   @Get(':id')
   @ApiResponse({ status: 200, type: User })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -49,10 +51,11 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'User not found' })
   updateUser(@Param('id') id: number, @Body() user: UpdateUserDto) {
-    return this.userService.updateUser(id, user);
+    return this.userService.updateUser(+id, user);
   }
 
   @Delete(':id')
+  @Roles(Role.Admin)
   @ApiResponse({ status: 204 })
   @ApiResponse({ status: 404, description: 'User not found' })
   async deleteUser(@Param('id') id: number) {

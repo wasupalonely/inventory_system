@@ -52,25 +52,28 @@ export class UserService {
   }
 
   async updateUser(id: number, user: UpdateUserDto): Promise<User> {
-    const userToUpdate = await this.getUser(id);
-
-    if (user.supermarketId) {
-      const supermarket = await this.supermarketService.getSupermarket(
-        user.supermarketId,
-      );
-      if (!supermarket) {
-        throw new NotFoundException(
-          `Supermarket with ID ${user.supermarketId} not found`,
+    try {
+      const userToUpdate = await this.getUser(id);
+      if (user.supermarketId) {
+        const supermarket = await this.supermarketService.getSupermarket(
+          user.supermarketId,
         );
+        if (!supermarket) {
+          throw new NotFoundException(
+            `Supermarket with ID ${user.supermarketId} not found`,
+          );
+        }
+
+        userToUpdate.supermarket = supermarket;
       }
 
-      userToUpdate.supermarket = supermarket;
+      return await this.userRepo.save({
+        ...userToUpdate,
+        ...user,
+      });
+    } catch (error) {
+      throw error;
     }
-
-    return await this.userRepo.save({
-      ...userToUpdate,
-      ...user,
-    });
   }
 
   async addUserToSupermarket(user: CreateUserDto): Promise<User> {
@@ -100,7 +103,16 @@ export class UserService {
     return userCreated;
   }
 
-  async deleteUser(id: number): Promise<void> {
-    await this.userRepo.delete(id);
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      const user = await this.getUser(id);
+      if (!user) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+      await this.userRepo.delete(id);
+      return true;
+    } catch (error) {
+      throw error;
+    }
   }
 }
