@@ -11,6 +11,8 @@ import {
 } from 'typeorm';
 import { Address } from './address.entity';
 import { User } from 'src/user/entities/user.entity';
+import { Category } from 'src/categories/entities/category.entity';
+import { Product } from 'src/products/entities/product.entity';
 
 @Entity({ name: 'supermarket' })
 export class Supermarket {
@@ -36,8 +38,14 @@ export class Supermarket {
   @JoinColumn()
   owner: User;
 
+  @OneToMany(() => Category, (category) => category.supermarket)
+  categories: Category[];
+
   @OneToMany(() => User, (user) => user.supermarket)
   users: User[];
+
+  @OneToMany(() => Product, (product) => product.supermarket)
+  products: Product[];
 
   @Column({ default: false })
   cronjobEnabled: boolean;
