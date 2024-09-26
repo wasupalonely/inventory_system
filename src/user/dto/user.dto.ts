@@ -1,5 +1,6 @@
 import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsNumber,
@@ -64,6 +65,11 @@ export class CreateUserDto {
   })
   password: string;
 
+  @ApiProperty({ example: true })
+  @IsBoolean()
+  @IsOptional()
+  isConfirmed: boolean;
+
   @ApiProperty({ example: 'viewer' })
   @IsString()
   @IsOptional()
@@ -74,5 +80,5 @@ export class UpdateUserDto extends PartialType(
   OmitType(CreateUserDto, ['password'] as const),
   {
     skipNullProperties: true,
-  }
+  },
 ) {}
