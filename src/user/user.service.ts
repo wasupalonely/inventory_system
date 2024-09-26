@@ -115,4 +115,16 @@ export class UserService {
       throw error;
     }
   }
+
+  async markUserAsConfirmed(id: number): Promise<User> {
+    const user = await this.getUser(id);
+    user.isConfirmed = true;
+    return await this.userRepo.save(user);
+  }
+
+  async updatePassword(id: number, password: string): Promise<User> {
+    const user = await this.getUser(id);
+    user.password = bcrypt.hashSync(password, 10);
+    return await this.userRepo.save(user);
+  }
 }

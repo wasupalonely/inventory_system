@@ -10,6 +10,7 @@ import { ProductsModule } from './products/products.module';
 import { SalesModule } from './sales/sales.module';
 import { SupermarketModule } from './supermarket/supermarket.module';
 import { UserModule } from './user/user.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { UserModule } from './user/user.module';
     ProductsModule,
     CategoriesModule,
     SalesModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

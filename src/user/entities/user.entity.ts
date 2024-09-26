@@ -48,6 +48,13 @@ export class User {
   @Column()
   password: string;
 
+  @ApiProperty({
+    example: true,
+    description: 'User account confirmation status',
+  })
+  @Column({ default: false })
+  isConfirmed: boolean;
+
   @ManyToOne(() => Supermarket, (supermarket) => supermarket.users)
   supermarket: Supermarket;
 
