@@ -21,11 +21,32 @@ export class User {
   id: number;
 
   @ApiProperty({
-    example: 'John Doe',
-    description: 'User name',
+    example: 'John',
+    description: "User's first name",
   })
   @Column()
-  name: string;
+  firstName: string;
+
+  @ApiProperty({
+    example: 'David',
+    description: "User's middle name",
+  })
+  @Column({ nullable: true })
+  middleName: string;
+
+  @ApiProperty({
+    example: 'Doe',
+    description: "User's last name",
+  })
+  @Column()
+  lastName: string;
+
+  @ApiProperty({
+    example: 'Doe',
+    description: "User's second last name",
+  })
+  @Column({ nullable: true })
+  secondLastName: string;
 
   @ApiProperty({
     example: 'uq0Jt@example.com',
@@ -42,7 +63,7 @@ export class User {
   phoneNumber: string;
 
   @ApiProperty({
-    example: 'password123',
+    example: 'Password123@',
     description: 'User password',
   })
   @Column()

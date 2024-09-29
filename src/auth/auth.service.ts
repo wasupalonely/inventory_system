@@ -7,6 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { LoginAuthDto } from './dto/login.dto';
 import { User } from 'src/user/entities/user.entity';
 import { MailService } from 'src/mail/mail.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
     private readonly usersService: UserService,
     private readonly jwtService: JwtService,
     private mailService: MailService,
+    private readonly configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<Partial<User>> {
@@ -64,7 +66,7 @@ export class AuthService {
     const confirmationToken = this.jwtService.sign({ email: user.email });
 
     // TODO: send email (Testear con el front)
-    const confirmationUrl = `http://domain.com/confirm?token=${confirmationToken}`;
+    const confirmationUrl = `${this.configService.get('CLIENT_URL')}/auth/confirm?token=${confirmationToken}`;
 
     await this.mailService.sendMail(
       user.email,
@@ -103,7 +105,7 @@ export class AuthService {
 
     const resetToken = this.jwtService.sign({ email: user.email });
 
-    const resetUrl = `http://your-domain.com/reset-password?token=${resetToken}`;
+    const resetUrl = `${this.configService.get('CLIENT_URL')}/auth/update-password?token=${resetToken}`;
 
     await this.mailService.sendMail(
       user.email,
