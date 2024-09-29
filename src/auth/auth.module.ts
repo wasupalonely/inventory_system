@@ -10,6 +10,7 @@ import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
+    ConfigModule,
     MailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

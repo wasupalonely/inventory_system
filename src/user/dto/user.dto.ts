@@ -2,6 +2,7 @@ import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -18,7 +19,31 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  firstName: string;
+
+  @ApiProperty({
+    example: 'Luigi',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  middleName: string;
+
+  @ApiProperty({
+    example: 'Rossi',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
+
+  @ApiProperty({
+    example: 'Rossi',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  secondLastName: string;
 
   @ApiProperty({
     example: 'admin@test.com',
@@ -53,7 +78,7 @@ export class CreateUserDto {
   phoneNumber: string;
 
   @ApiProperty({
-    example: 'StrongP@ssw0rd',
+    example: 'StrongP@ssw0rd1',
     required: true,
   })
   @IsString()
@@ -72,6 +97,7 @@ export class CreateUserDto {
 
   @ApiProperty({ example: 'viewer' })
   @IsString()
+  @IsEnum(Role, { message: 'Role must be either viewer, cashier or admin' })
   @IsOptional()
   role: Role;
 }
