@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Sale } from 'src/sales/entities/sale.entity';
 import { Role } from 'src/shared/enums/roles.enum';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import {
@@ -6,6 +7,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -81,6 +83,9 @@ export class User {
 
   @OneToOne(() => Supermarket, (supermarket) => supermarket.owner)
   ownedSupermarket: Supermarket;
+
+  @OneToMany(() => Sale, (sale) => sale.user)
+  sales: Sale[];
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',

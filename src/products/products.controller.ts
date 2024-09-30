@@ -1,8 +1,9 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
+import { CreateProductDto } from './dto/product.dto';
 
 @ApiTags('Products')
 @UseGuards(JwtAuthGuard)
@@ -27,6 +28,13 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   getProduct(@Param('id') id: number) {
     return this.productsService.findOne(id);
+  }
+
+  @Post()
+  @ApiResponse({ status: 201, type: Product })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  createProduct(@Body() product: CreateProductDto) {
+    return this.productsService.create(product);
   }
 
   //   @Get('category/:categoryId')

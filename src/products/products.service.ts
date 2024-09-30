@@ -36,11 +36,14 @@ export class ProductsService {
   }
 
   async create(product: CreateProductDto): Promise<Product> {
-    const category = await this.categoryService.findOne(product.categoryId);
+    const category = await this.categoryService.getCategoryByIdAndSupermarketId(
+      product.categoryId,
+      product.supermarketId,
+    );
 
     if (!category) {
       throw new NotFoundException(
-        `Category with ID ${product.categoryId} not found`,
+        `Category with ID ${product.categoryId} not found for supermarket ${product.supermarketId}`,
       );
     }
 
@@ -54,6 +57,12 @@ export class ProductsService {
       );
     }
 
-    return await this.productRepo.save(product);
+    const newProduct = this.productRepo.create({
+      ...product,
+      category,
+      supermarket,
+    });
+
+    return await this.productRepo.save(newProduct);
   }
 }

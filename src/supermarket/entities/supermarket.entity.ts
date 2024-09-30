@@ -13,6 +13,8 @@ import { Address } from './address.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Category } from 'src/categories/entities/category.entity';
 import { Product } from 'src/products/entities/product.entity';
+import { Inventory } from 'src/inventory/entities/inventory.entity';
+import { Sale } from 'src/sales/entities/sale.entity';
 
 @Entity({ name: 'supermarket' })
 export class Supermarket {
@@ -46,6 +48,12 @@ export class Supermarket {
 
   @OneToMany(() => Product, (product) => product.supermarket)
   products: Product[];
+
+  @OneToMany(() => Inventory, (inventory) => inventory.supermarket)
+  inventory: Inventory[];
+
+  @OneToMany(() => Sale, (sale) => sale.supermarket)
+  sales: Sale[];
 
   @Column({ default: false })
   cronjobEnabled: boolean;

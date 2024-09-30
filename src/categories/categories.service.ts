@@ -28,6 +28,21 @@ export class CategoriesService {
     return;
   }
 
+  async getCategoryByIdAndSupermarketId(
+    id: number,
+    supermarketId: number,
+  ): Promise<Category> {
+    const category = await this.categoryRepo.findOne({
+      where: { id, supermarket: { id: supermarketId } },
+    });
+    if (!category) {
+      throw new NotFoundException(
+        `Category with ID ${id} not found in supermarket ${supermarketId}`,
+      );
+    }
+    return category;
+  }
+
   async create(category: CreateCategoryDto): Promise<Category> {
     const supermarket = await this.supermarketService.getSupermarket(
       category.supermarketId,
