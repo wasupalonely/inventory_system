@@ -112,4 +112,8 @@ export class User {
     default: Role.Viewer,
   })
   role: Role;
+
+  getFullName?(): string {
+    return `${this.firstName}${this.middleName ?? ' '}${this.lastName} ${this.secondLastName ?? ''}`.trim();
+  }
 }

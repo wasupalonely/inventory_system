@@ -1,24 +1,23 @@
-// src/sales/sales.controller.ts
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { SalesService } from './sales.service';
+import { CreateSaleDto } from './dto/sale.dto';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { Roles } from 'src/shared/decorators/roles.decorators';
+import { Role } from 'src/shared/enums/roles.enum';
 
+@ApiTags('Sales')
 @Controller('sales')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
+  @Roles(Role.Admin, Role.Cashier)
   @Post()
-  async createSale(
-    @Body('userId') userId: number,
-    @Body('supermarketId') supermarketId: number,
-    @Body('productQuantities')
-    productQuantities: { productId: number; quantity: number }[],
-    @Body('totalPrice') totalPrice: number,
-  ) {
-    return this.salesService.createSale(
-      userId,
-      supermarketId,
-      productQuantities,
-      totalPrice,
-    );
+  @ApiResponse({ status: 201, description: 'Sale created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  async createSale(@Body() createSaleDto: CreateSaleDto) {
+    return this.salesService.createSale(createSaleDto);
   }
 }

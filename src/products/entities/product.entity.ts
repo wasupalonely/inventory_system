@@ -39,13 +39,6 @@ export class Product {
   @Column()
   price: number;
 
-  @ApiProperty({
-    example: 4,
-    description: 'The quantity of the product',
-  })
-  @Column({ default: 0 })
-  quantity: number;
-
   @ManyToOne(() => Category, (category) => category.products)
   category: Category;
 
