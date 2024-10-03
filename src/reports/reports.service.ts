@@ -3,10 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as PDFDocument from 'pdfkit';
-import * as moment from 'moment'; // Importar moment para formateo de fechas
+import * as moment from 'moment';
 import { Response } from 'express';
 import { Sale } from 'src/sales/entities/sale.entity';
 import { SupermarketService } from 'src/supermarket/supermarket.service';
+import { ReportFiltersDto } from './dto/report-filters.dto';
 
 @Injectable()
 export class ReportsService {
@@ -16,35 +17,57 @@ export class ReportsService {
     private supermarketService: SupermarketService,
   ) {}
 
-  async getSalesReport(supermarketId: number, startDate: Date, endDate: Date) {
-    return this.saleRepository
+  async getSalesReport(filters: ReportFiltersDto) {
+    const query = this.saleRepository
       .createQueryBuilder('sale')
       .leftJoinAndSelect('sale.user', 'user')
       .leftJoinAndSelect('sale.saleItems', 'saleItems')
       .leftJoinAndSelect('saleItems.product', 'product')
-      .where('sale.supermarketId = :supermarketId', { supermarketId })
-      .andWhere('sale.date BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      })
-      .getMany();
+      .where('sale.supermarketId = :supermarketId', {
+        supermarketId: filters.supermarketId,
+      });
+
+    if (filters.userId) {
+      query.andWhere('sale.userId = :userId', { userId: filters.userId });
+    }
+
+    if (filters.productId) {
+      query.andWhere('saleItems.productId = :productId', {
+        productId: filters.productId,
+      });
+    }
+
+    if (filters.categoryId) {
+      query.andWhere('product.categoryId = :categoryId', {
+        categoryId: filters.categoryId,
+      });
+    }
+
+    if (filters.startDate && filters.endDate) {
+      query.andWhere('sale.date BETWEEN :startDate AND :endDate', {
+        startDate: moment(filters.startDate).startOf('day').toDate(),
+        endDate: moment(filters.endDate).endOf('day').toDate(),
+      });
+    }
+
+    return query.getMany();
   }
 
-  async generateSalesReportPDF(
-    supermarketId: number,
-    startDate: Date,
-    endDate: Date,
-    response: Response,
-  ) {
-    const sales = await this.getSalesReport(supermarketId, startDate, endDate);
-    const supermarket =
-      await this.supermarketService.getSupermarket(supermarketId);
+  async generateSalesReportPDF(filters: ReportFiltersDto, response: Response) {
+    console.log(
+      '🚀 ~ ReportsService ~ generateSalesReportPDF ~ filters:',
+      filters,
+    );
+    const sales = await this.getSalesReport(filters);
+    const supermarket = await this.supermarketService.getSupermarket(
+      filters.supermarketId,
+    );
 
     const doc = new PDFDocument({ margin: 50 });
     response.setHeader('Content-Type', 'application/pdf');
     response.setHeader(
       'Content-Disposition',
-      `attachment; filename=report_${moment(startDate).format('YYYY-MM-DD')}_to_${moment(endDate).format('YYYY-MM-DD')}.pdf`,
+      `attachment; filename=report_${filters.startDate ? moment(filters.startDate).format('YYYY-MM-DD') : 'all'}_to_${filters.endDate ? moment(filters.endDate).format('YYYY-MM-DD') : 'all'}.pdf`,
     );
 
     doc.pipe(response);
@@ -55,23 +78,32 @@ export class ReportsService {
       .text(`Reporte de Ventas del Supermercado "${supermarket.name}"`, {
         align: 'center',
       });
-    doc
-      .fontSize(14)
-      .font('Helvetica')
-      .text(
-        `Del ${moment(startDate).format('DD/MM/YYYY')} al ${moment(endDate).format('DD/MM/YYYY')}`,
-        {
-          align: 'center',
-        },
-      );
+
+    if (filters.startDate && filters.endDate) {
+      doc
+        .fontSize(14)
+        .font('Helvetica')
+        .text(
+          `Del ${moment(filters.startDate).format('DD/MM/YYYY')} al ${moment(filters.endDate).format('DD/MM/YYYY')}`,
+          { align: 'center' },
+        );
+    } else {
+      doc
+        .fontSize(14)
+        .font('Helvetica')
+        .text('Reporte general (sin rango de fechas)', { align: 'center' });
+    }
     doc.moveDown(2);
 
     if (sales.length === 0) {
       doc
         .fontSize(14)
-        .text('No se encontraron ventas en el rango de fechas proporcionado.', {
-          align: 'center',
-        });
+        .text(
+          'No se encontraron ventas en el rango de fechas o filtros proporcionados.',
+          {
+            align: 'center',
+          },
+        );
       doc.end();
       return;
     }

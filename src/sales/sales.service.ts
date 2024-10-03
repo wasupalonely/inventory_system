@@ -1,4 +1,3 @@
-// src/sales/sales.service.ts
 import {
   BadRequestException,
   Injectable,
@@ -12,6 +11,8 @@ import { Product } from 'src/products/entities/product.entity';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import { CreateSaleDto } from './dto/sale.dto';
+import * as PDFDocument from 'pdfkit';
+import { Response } from 'express';
 
 @Injectable()
 export class SalesService {
@@ -28,10 +29,10 @@ export class SalesService {
 
   async createSale(createSaleDto: CreateSaleDto) {
     const sale = new Sale();
-    sale.user = { id: createSaleDto.userId } as any; // Relación con el usuario
+    sale.user = { id: createSaleDto.userId } as any;
     sale.supermarket = { id: createSaleDto.supermarketId } as Supermarket;
-    sale.totalPrice = createSaleDto.totalPrice;
 
+    let totalPrice = 0;
     const saleItems: SaleItem[] = [];
 
     for (const { productId, quantity } of createSaleDto.productQuantities) {
@@ -50,7 +51,7 @@ export class SalesService {
           supermarket: { id: createSaleDto.supermarketId },
         },
       });
-      console.log('🚀 ~ SalesService ~ createSale ~ inventory:', inventory);
+
       if (!inventory || inventory.stock < quantity) {
         throw new BadRequestException(
           `Stock insuficiente para el producto ${product.name}`,
@@ -60,14 +61,68 @@ export class SalesService {
       inventory.stock -= quantity;
       await this.inventoryRepository.save(inventory);
 
+      const subtotal = product.price * quantity;
+      totalPrice += subtotal;
+
       const saleItem = new SaleItem();
       saleItem.product = product;
       saleItem.quantity = quantity;
       saleItems.push(saleItem);
     }
 
+    sale.totalPrice = totalPrice;
     sale.saleItems = saleItems;
+
     await this.saleRepository.save(sale);
     return sale;
+  }
+
+  async generateInvoicePDF(saleId: number, response: Response) {
+    const sale = await this.saleRepository.findOne({
+      where: { id: saleId },
+      relations: ['saleItems', 'saleItems.product', 'user', 'supermarket'],
+    });
+
+    if (!sale) {
+      throw new NotFoundException(`Venta con ID ${saleId} no encontrada`);
+    }
+
+    const doc = new PDFDocument({ margin: 50 });
+    response.setHeader('Content-Type', 'application/pdf');
+    response.setHeader(
+      'Content-Disposition',
+      `attachment; filename=factura_${saleId}.pdf`,
+    );
+
+    doc.pipe(response);
+
+    doc.fontSize(20).text(`Factura de Venta #${saleId}`, { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).text(`Supermercado: ${sale.supermarket.name}`);
+    doc.text(`Fecha: ${sale.date}`);
+    doc.text(`Cliente: ${sale.user.getFullName()}`);
+    doc.text(`Total: $${sale.totalPrice}`);
+    doc.moveDown(2);
+
+    doc.fontSize(16).text('Detalles de los Productos:');
+    sale.saleItems.forEach((item, index) => {
+      doc
+        .fontSize(12)
+        .text(
+          `${index + 1}. ${item.product.name} - ${item.quantity} unidades - $${item.product.price} c/u`,
+        );
+    });
+
+    doc.end();
+  }
+
+  async getSales() {
+    return this.saleRepository.find();
+  }
+
+  async getSalesBySupermarket(supermarketId: number) {
+    return this.saleRepository.find({
+      where: { supermarket: { id: supermarketId } },
+    });
   }
 }

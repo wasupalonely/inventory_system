@@ -12,10 +12,6 @@ export class CreateSaleDto {
 
   @IsArray()
   productQuantities: ProductQuantity[];
-
-  @IsNumber()
-  @IsNotEmpty()
-  totalPrice: number;
 }
 
 export interface ProductQuantity {

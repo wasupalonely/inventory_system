@@ -20,11 +20,9 @@ export class InventoryService {
 
   async addStock(createInventoryDto: CreateInventoryDto): Promise<Inventory> {
     const product = await this.productRepository.findOne({
-      where: {
-        id: createInventoryDto.productId,
-        supermarket: { id: createInventoryDto.supermarketId },
-      },
+      where: { id: createInventoryDto.productId },
     });
+
     const supermarket = await this.supermarketRepository.findOne({
       where: { id: createInventoryDto.supermarketId },
     });
@@ -34,7 +32,10 @@ export class InventoryService {
     }
 
     let inventory = await this.inventoryRepository.findOne({
-      where: { product, supermarket },
+      where: {
+        product: { id: product.id },
+        supermarket: { id: supermarket.id },
+      },
     });
 
     if (!inventory) {
