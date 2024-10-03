@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import { Repository } from 'typeorm';
@@ -22,7 +22,7 @@ export class PredictionsService {
     });
 
     if (!supermarket) {
-      throw new Error('Supermarket not found');
+      throw new NotFoundException('Supermarket not found');
     }
 
     const newPrediction = this.predictionRepository.create({
@@ -43,7 +43,7 @@ export class PredictionsService {
     });
 
     if (!prediction) {
-      throw new Error('Prediction not found');
+      throw new NotFoundException('Prediction not found');
     }
 
     const updatedPrediction = this.predictionRepository.merge(

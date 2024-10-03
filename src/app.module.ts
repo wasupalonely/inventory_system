@@ -11,6 +11,8 @@ import { SalesModule } from './sales/sales.module';
 import { SupermarketModule } from './supermarket/supermarket.module';
 import { UserModule } from './user/user.module';
 import { MailModule } from './mail/mail.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { MailModule } from './mail/mail.module';
     CategoriesModule,
     SalesModule,
     MailModule,
+    InventoryModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
