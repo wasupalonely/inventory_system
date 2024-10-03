@@ -19,7 +19,7 @@ import { Address } from './entities/address.entity';
 import * as moment from 'moment';
 // import * as fs from 'fs';
 // import * as path from 'path';
-import { importDynamic } from 'src/shared/utils';
+// import { importDynamic } from 'src/shared/utils';
 
 @Injectable()
 export class SupermarketService implements OnModuleInit {
