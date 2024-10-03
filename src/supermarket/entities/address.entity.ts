@@ -20,25 +20,40 @@ export class Address {
   id: number;
 
   @ApiProperty({
-    example: 'Calle 123',
-    description: 'Street name',
+    example: 'Royal Palace',
+    description: 'Supermarket neighborhood',
   })
   @Column()
-  streetName: string;
-
-  @ApiProperty({
-    example: '14A',
-    description: 'Street number',
-    nullable: true,
-  })
-  @Column()
-  streetNumber: string;
+  neighborhood: string;
 
   @Column({
     type: 'enum',
     enum: LocationType,
   })
   locationType: LocationType;
+
+  @ApiProperty({
+    example: '37',
+    description: 'Street number',
+  })
+  @Column()
+  streetNumber: string;
+
+  @ApiProperty({
+    example: '4W',
+    description: 'Intersection number of the street',
+  })
+  @Column({ nullable: true })
+  intersectionNumber: string;
+
+  @ApiProperty({
+    example: '05',
+    description: 'building street number',
+  })
+  @Column({
+    nullable: true,
+  })
+  buildingNumber: string;
 
   @ApiProperty({
     example: 'Second Floor',

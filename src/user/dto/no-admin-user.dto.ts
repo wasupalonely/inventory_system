@@ -1,17 +1,17 @@
 import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
   IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEmail,
+  IsNumber,
   Length,
   Matches,
+  IsEnum,
 } from 'class-validator';
 import { Role } from 'src/shared/enums/roles.enum';
 
-export class CreateUserDto {
+export class AddUserToSupermarketDto {
   @ApiProperty({
     example: 'Mario',
     required: true,
@@ -58,7 +58,7 @@ export class CreateUserDto {
   })
   @IsOptional()
   @IsNumber()
-  ownedSupermarketId: number;
+  supermarketId: number;
 
   @ApiProperty({
     example: '1234567890',
@@ -81,11 +81,6 @@ export class CreateUserDto {
   })
   password: string;
 
-  // @ApiProperty({ example: true })
-  // @IsBoolean()
-  // @IsOptional()
-  // isConfirmed: boolean;
-
   @ApiProperty({ example: 'viewer' })
   @IsString()
   @IsEnum(Role, { message: 'Role must be either viewer, cashier or admin' })
@@ -93,8 +88,8 @@ export class CreateUserDto {
   role: Role;
 }
 
-export class UpdateUserDto extends PartialType(
-  OmitType(CreateUserDto, ['password'] as const),
+export class UpdateUserNoAdminDto extends PartialType(
+  OmitType(AddUserToSupermarketDto, ['password'] as const),
   {
     skipNullProperties: true,
   },

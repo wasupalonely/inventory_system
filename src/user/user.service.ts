@@ -11,6 +11,11 @@ import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import * as bcrypt from 'bcryptjs';
 import { SupermarketService } from 'src/supermarket/supermarket.service';
+import {
+  AddUserToSupermarketDto,
+  UpdateUserNoAdminDto,
+} from './dto/no-admin-user.dto';
+import { Role } from 'src/shared/enums/roles.enum';
 
 @Injectable()
 export class UserService {
@@ -25,7 +30,10 @@ export class UserService {
   }
 
   async getUser(id: number): Promise<User> {
-    const user = await this.userRepo.findOne({ where: { id } });
+    const user = await this.userRepo.findOne({
+      where: { id },
+      relations: ['supermarket', 'ownedSupermarket'],
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -38,7 +46,10 @@ export class UserService {
   }
 
   async getUserByIdentifier(identifier: string): Promise<User> {
-    const user = await this.userRepo.findOne({ where: { email: identifier } });
+    const user = await this.userRepo.findOne({
+      where: { email: identifier },
+      relations: ['supermarket', 'ownedSupermarket'],
+    });
     if (!user) {
       throw new NotFoundException(`User with email ${identifier} not found`);
     }
@@ -51,10 +62,20 @@ export class UserService {
     return userWithoutPassword;
   }
 
-  async updateUser(id: number, user: UpdateUserDto): Promise<User> {
+  private isUpdateUserNoAdminDto(
+    user: UpdateUserDto | UpdateUserNoAdminDto,
+  ): user is UpdateUserNoAdminDto {
+    return (user as UpdateUserNoAdminDto).supermarketId !== undefined;
+  }
+
+  async updateUser(
+    id: number,
+    user: UpdateUserDto | UpdateUserNoAdminDto,
+  ): Promise<User> {
     try {
       const userToUpdate = await this.getUser(id);
-      if (user.supermarketId) {
+
+      if (this.isUpdateUserNoAdminDto(user)) {
         const supermarket = await this.supermarketService.getSupermarket(
           user.supermarketId,
         );
@@ -76,19 +97,20 @@ export class UserService {
     }
   }
 
-  async addUserToSupermarket(user: CreateUserDto): Promise<User> {
+  async addUserToSupermarket(user: AddUserToSupermarketDto): Promise<User> {
     const userValidation = await this.validateUserExistence(user.email);
     if (userValidation) {
       throw new BadRequestException('User already exists');
     }
 
-    if (!user.supermarketId) {
-      throw new BadRequestException('Supermarket ID is required');
+    if (user.role === Role.Admin) {
+      throw new BadRequestException('No se puede agregar un administrador');
     }
 
     const supermarket = await this.userRepo.findOne({
       where: { id: user.supermarketId },
     });
+
     if (!supermarket) {
       throw new NotFoundException(
         `Supermarket with ID ${user.supermarketId} not found`,
@@ -98,9 +120,14 @@ export class UserService {
     user.password = bcrypt.hashSync(user.password, 10);
     const userCreated = this.userRepo.create({
       ...user,
+      isConfirmed: true,
       supermarket: supermarket,
     });
-    return userCreated;
+
+    await this.userRepo.save(userCreated);
+    const userWithoutPassword = { ...userCreated, password: undefined };
+
+    return userWithoutPassword;
   }
 
   async deleteUser(id: number): Promise<boolean> {

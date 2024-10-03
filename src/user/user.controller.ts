@@ -9,13 +9,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { UpdateUserDto } from './dto/user.dto';
 import { Roles } from 'src/shared/decorators/roles.decorators';
 import { Role } from 'src/shared/enums/roles.enum';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
+import { AddUserToSupermarketDto } from './dto/no-admin-user.dto';
 
 @ApiTags('User')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -42,7 +43,7 @@ export class UserController {
   @Roles(Role.Admin)
   @ApiResponse({ status: 201, type: User })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  addUserToSupermarket(@Body() user: CreateUserDto) {
+  addUserToSupermarket(@Body() user: AddUserToSupermarketDto) {
     return this.userService.addUserToSupermarket(user);
   }
 

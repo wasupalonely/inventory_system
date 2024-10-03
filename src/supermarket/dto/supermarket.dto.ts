@@ -13,11 +13,18 @@ import { LocationType } from 'src/shared/enums/location-type.enum';
 export class CreateAddressDto {
   @ApiProperty({
     example: 'Calle real',
-    description: 'Street name',
+    description: 'The neighborhood name',
   })
   @IsString()
   @IsNotEmpty()
-  streetName: string;
+  neighborhood: string;
+
+  @ApiProperty({
+    example: 'street',
+    description: 'Location type',
+  })
+  @IsEnum(LocationType, { message: 'Invalid location type' })
+  locationType: LocationType;
 
   @ApiProperty({
     example: '14A',
@@ -28,6 +35,22 @@ export class CreateAddressDto {
   streetNumber: string;
 
   @ApiProperty({
+    example: '4W',
+    description: 'Intersection number of the street',
+  })
+  @IsString()
+  @IsOptional()
+  intersectionNumber: string;
+
+  @ApiProperty({
+    example: '05',
+    description: 'building street number',
+  })
+  @IsString()
+  @IsOptional()
+  buildingNumber: string;
+
+  @ApiProperty({
     example: 'Second Floor',
     description: 'Additional information',
   })
@@ -35,12 +58,6 @@ export class CreateAddressDto {
   @IsString()
   additionalInfo?: string;
 
-  @ApiProperty({
-    example: 'street',
-    description: 'Location type',
-  })
-  @IsEnum(LocationType, { message: 'Invalid location type' })
-  locationType: LocationType;
   // city: string;
   // state: string;
   // zipCode?: string;
