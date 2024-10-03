@@ -46,7 +46,10 @@ export class UserService {
   }
 
   async getUserByIdentifier(identifier: string): Promise<User> {
-    const user = await this.userRepo.findOne({ where: { email: identifier } });
+    const user = await this.userRepo.findOne({
+      where: { email: identifier },
+      relations: ['supermarket', 'ownedSupermarket'],
+    });
     if (!user) {
       throw new NotFoundException(`User with email ${identifier} not found`);
     }

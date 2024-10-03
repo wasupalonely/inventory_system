@@ -44,8 +44,10 @@ export class AuthService {
       sub: userValidation.id,
       role: userValidation.role,
     };
+
     return {
       access_token: this.jwtService.sign(payload),
+      user: userValidation,
     };
   }
 
