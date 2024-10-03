@@ -58,7 +58,10 @@ export class SupermarketService implements OnModuleInit {
   }
 
   async getSupermarket(id: number): Promise<Supermarket> {
-    const supermarket = await this.supermarketRepo.findOne({ where: { id } });
+    const supermarket = await this.supermarketRepo.findOne({
+      where: { id },
+      relations: ['address', 'owner', 'categories', 'users'],
+    });
     if (!supermarket) {
       throw new NotFoundException(`Supermarket with ID ${id} not found`);
     }

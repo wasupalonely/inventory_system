@@ -8,6 +8,7 @@ import { LoginAuthDto } from './dto/login.dto';
 import { User } from 'src/user/entities/user.entity';
 import { MailService } from 'src/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
+import { Role } from 'src/shared/enums/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -58,6 +59,10 @@ export class AuthService {
     );
     if (userValidation) {
       throw new BadRequestException('User already exists');
+    }
+
+    if (userDto.role !== Role.Admin) {
+      throw new BadRequestException('Solo se puede registrar un administrador');
     }
 
     userDto.password = bcrypt.hashSync(userDto.password, 10);
