@@ -25,7 +25,7 @@ export class CreateAddressDto {
   })
   @IsString()
   @IsNotEmpty()
-  streetNumber: number;
+  streetNumber: string;
 
   @ApiProperty({
     example: 'Second Floor',

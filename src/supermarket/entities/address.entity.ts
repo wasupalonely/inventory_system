@@ -27,11 +27,12 @@ export class Address {
   streetName: string;
 
   @ApiProperty({
-    example: 123,
+    example: '14A',
     description: 'Street number',
+    nullable: true,
   })
   @Column()
-  streetNumber: number;
+  streetNumber: string;
 
   @Column({
     type: 'enum',
