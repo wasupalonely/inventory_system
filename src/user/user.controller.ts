@@ -62,4 +62,11 @@ export class UserController {
   async deleteUser(@Param('id') id: number) {
     await this.userService.deleteUser(id);
   }
+
+  @ApiResponse({ status: 200, type: Boolean })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @Post('compare-password/:id')
+  async comparePasswordByUserId(@Param('id') id: number, @Body() payload: { password: string }): Promise<boolean> {
+    return await this.userService.comparePasswordByUserId(id, payload.password);
+  }
 }
