@@ -154,4 +154,12 @@ export class UserService {
     user.password = bcrypt.hashSync(password, 10);
     return await this.userRepo.save(user);
   }
+
+  async comparePasswordByUserId(id: number, password: string): Promise<boolean> {
+    const user = await this.getUser(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return bcrypt.compareSync(password, user.password);
+  }
 }
