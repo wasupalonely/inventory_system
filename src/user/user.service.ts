@@ -150,6 +150,12 @@ export class UserService {
   }
 
   async updatePassword(id: number, password: string): Promise<User> {
+    const passwordRequirements: RegExp = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*\d).{9,20}$/;
+
+    if (!password.match(passwordRequirements)) {
+      throw new BadRequestException('Password must have between 9 and 20 characters, have at least 1 uppercase letter, 1 number and 1 special character.');
+    }
+
     const user = await this.getUser(id);
     user.password = bcrypt.hashSync(password, 10);
     return await this.userRepo.save(user);
