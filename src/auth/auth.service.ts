@@ -9,6 +9,7 @@ import { User } from 'src/user/entities/user.entity';
 import { MailService } from 'src/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { Role } from 'src/shared/enums/roles.enum';
+import { TokenService } from './token.service';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private mailService: MailService,
     private readonly configService: ConfigService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<Partial<User>> {
@@ -90,13 +92,19 @@ export class AuthService {
 
   // CONFIRM ACCOUNT
   async confirmAccount(token: string) {
-    const { email } = this.jwtService.verify(token);
+    const tokenUsed = await this.tokenService.isTokenUsed(token);
+    if (tokenUsed) {
+      throw new BadRequestException('Token has already been used.');
+    }
 
+    const { email } = this.jwtService.verify(token);
     const user = await this.usersService.getUserByIdentifier(email);
 
     if (!user) {
       throw new BadRequestException('Invalid token');
     }
+
+    await this.tokenService.markTokenAsUsed(token);
 
     await this.usersService.markUserAsConfirmed(user.id);
     return { message: 'Account confirmed successfully.' };
@@ -105,15 +113,14 @@ export class AuthService {
   // FORGOT PASSWORD
   async forgotPassword(email: string) {
     const user = await this.usersService.getUserByIdentifier(email);
-
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
     const resetToken = this.jwtService.sign({ email: user.email });
+    await this.tokenService.createToken(user.email, resetToken);
 
     const resetUrl = `${this.configService.get('CLIENT_URL')}/auth/update-password?token=${resetToken}`;
-
     await this.mailService.sendMail(
       user.email,
       'Reset Password',
@@ -125,8 +132,12 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    const { email } = this.jwtService.verify(token);
+    const tokenUsed = await this.tokenService.isTokenUsed(token);
+    if (tokenUsed) {
+      throw new BadRequestException('Token has already been used.');
+    }
 
+    const { email } = this.jwtService.verify(token);
     const user = await this.usersService.getUserByIdentifier(email);
 
     if (!user) {
@@ -134,6 +145,9 @@ export class AuthService {
     }
 
     await this.usersService.updatePassword(user.id, newPassword);
+
+    await this.tokenService.markTokenAsUsed(token);
+
     return { message: 'Password updated successfully.' };
   }
 }
