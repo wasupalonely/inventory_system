@@ -19,11 +19,11 @@ import { User } from './entities/user.entity';
 import { AddUserToSupermarketDto } from './dto/no-admin-user.dto';
 
 @ApiTags('User')
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Get()
   @ApiResponse({ status: 200, type: [User] })
@@ -31,6 +31,7 @@ export class UserController {
     return this.userService.getUsers();
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Get(':id')
   @ApiResponse({ status: 200, type: User })
@@ -39,6 +40,7 @@ export class UserController {
     return this.userService.getUser(id);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
   @Roles(Role.Admin)
   @ApiResponse({ status: 201, type: User })
@@ -47,6 +49,7 @@ export class UserController {
     return this.userService.addUserToSupermarket(user);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(':id')
   @ApiResponse({ status: 200, type: User })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -55,6 +58,7 @@ export class UserController {
     return this.userService.updateUser(+id, user);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
   @Roles(Role.Admin)
   @ApiResponse({ status: 204 })
@@ -66,7 +70,10 @@ export class UserController {
   @ApiResponse({ status: 200, type: Boolean })
   @ApiResponse({ status: 404, description: 'User not found' })
   @Post('compare-password/:id')
-  async comparePasswordByUserId(@Param('id') id: number, @Body() payload: { password: string }): Promise<boolean> {
+  async comparePasswordByUserId(
+    @Param('id') id: number,
+    @Body() payload: { password: string },
+  ): Promise<boolean> {
     return await this.userService.comparePasswordByUserId(id, payload.password);
   }
 }
