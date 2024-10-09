@@ -57,10 +57,6 @@ export class AuthService {
     const userValidation = await this.usersService.validateUserExistence(
       userDto.email,
     );
-    console.log(
-      '🚀 ~ AuthService ~ register ~ userValidation:',
-      userValidation,
-    );
     if (userValidation) {
       throw new BadRequestException('User already exists');
     }
@@ -74,7 +70,8 @@ export class AuthService {
 
     const confirmationToken = this.jwtService.sign({ email: user.email });
 
-    // TODO: send email (Testear con el front)
+    await this.tokenService.createToken(user.email, confirmationToken);
+
     const confirmationUrl = `${this.configService.get('CLIENT_URL')}/auth/confirm?token=${confirmationToken}`;
 
     await this.mailService.sendMail(
@@ -120,7 +117,7 @@ export class AuthService {
     const resetToken = this.jwtService.sign({ email: user.email });
     await this.tokenService.createToken(user.email, resetToken);
 
-    const resetUrl = `${this.configService.get('CLIENT_URL')}/auth/update-password?token=${resetToken}`;
+    const resetUrl = `${this.configService.get('CLIENT_URL')}/auth/update-password?token=${resetToken}&id=${user.id}`;
     await this.mailService.sendMail(
       user.email,
       'Reset Password',

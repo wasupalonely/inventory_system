@@ -10,6 +10,7 @@ import { MailModule } from 'src/mail/mail.module';
 import { TokenService } from './token.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Token } from 'src/entities/token.entity';
+import { TokenController } from './token.controller';
 
 @Module({
   imports: [
@@ -29,6 +30,6 @@ import { Token } from 'src/entities/token.entity';
   ],
   providers: [AuthService, JwtStrategy, TokenService],
   exports: [],
-  controllers: [AuthController],
+  controllers: [AuthController, TokenController],
 })
 export class AuthModule {}
