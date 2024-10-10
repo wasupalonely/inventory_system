@@ -15,8 +15,7 @@ import { Role } from 'src/shared/enums/roles.enum';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import {
-  CreateSupermarketDto,
-  UpdateSupermarketDto,
+  CreateSupermarketDto, UpdateSupermarketDto,
 } from './dto/supermarket.dto';
 import { Supermarket } from './entities/supermarket.entity';
 import { SupermarketService } from './supermarket.service';

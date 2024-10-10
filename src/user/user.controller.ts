@@ -86,3 +86,4 @@ export class UserController {
     return await this.userService.comparePasswordByUserId(id, payload.password);
   }
 }
+

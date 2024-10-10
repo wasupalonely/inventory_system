@@ -1,4 +1,3 @@
-// src/auth/auth.controller.ts
 import { Body, Controller, Post, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/user/dto/user.dto';
