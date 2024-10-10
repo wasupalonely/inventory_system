@@ -1,20 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Category } from 'src/categories/entities/category.entity';
+import { Inventory } from 'src/inventory/entities/inventory.entity';
+import { Product } from 'src/products/entities/product.entity';
+import { Sale } from 'src/sales/entities/sale.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  JoinColumn,
 } from 'typeorm';
 import { Address } from './address.entity';
-import { User } from 'src/user/entities/user.entity';
-import { Category } from 'src/categories/entities/category.entity';
-import { Product } from 'src/products/entities/product.entity';
-import { Inventory } from 'src/inventory/entities/inventory.entity';
-import { Sale } from 'src/sales/entities/sale.entity';
 
 @Entity({ name: 'supermarket' })
 export class Supermarket {
@@ -27,7 +27,7 @@ export class Supermarket {
 
   @ApiProperty({
     example: 'Supermarket 123',
-    description: 'Supermarket name',
+    description: 'Nombre del supermercado',
   })
   @Column()
   name: string;
@@ -63,14 +63,14 @@ export class Supermarket {
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
-    description: 'Supermarket creation date',
+    description: 'Fecha de creación del supermercado',
   })
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
-    description: 'Supermarket update date',
+    description: 'Fecha de actualización del supermercado',
   })
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;

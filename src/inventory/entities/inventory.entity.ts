@@ -2,13 +2,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Product } from 'src/products/entities/product.entity';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Inventory {
   @ApiProperty({
     example: 1,
-    description: 'The id of the inventory',
+    description: 'Id del inventario',
   })
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,7 +21,7 @@ export class Inventory {
 
   @ApiProperty({
     example: 10,
-    description: 'The stock of the product in the inventory',
+    description: 'Las existencias del producto en el inventario',
   })
   @Column({ type: 'int' })
   stock: number;

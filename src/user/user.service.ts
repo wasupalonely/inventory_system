@@ -6,16 +6,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import * as bcrypt from 'bcryptjs';
+import { Role } from 'src/shared/enums/roles.enum';
 import { SupermarketService } from 'src/supermarket/supermarket.service';
+import { Repository } from 'typeorm';
 import {
   AddUserToSupermarketDto,
   UpdateUserNoAdminDto,
 } from './dto/no-admin-user.dto';
-import { Role } from 'src/shared/enums/roles.enum';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -100,7 +100,7 @@ export class UserService {
   async addUserToSupermarket(user: AddUserToSupermarketDto): Promise<User> {
     const userValidation = await this.validateUserExistence(user.email);
     if (userValidation) {
-      throw new BadRequestException('User already exists');
+      throw new BadRequestException('El usuario ya existe');
     }
 
     if (user.role === Role.Admin) {
@@ -163,7 +163,7 @@ export class UserService {
     const passwordRequirements: RegExp = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*\d).{9,20}$/;
 
     if (!password.match(passwordRequirements)) {
-      throw new BadRequestException('Password must have between 9 and 20 characters, have at least 1 uppercase letter, 1 number and 1 special character.');
+      throw new BadRequestException('La contraseña debe tener entre 9 y 20 caracteres, tener al menos 1 letra mayúscula, 1 número y 1 carácter especial.');
     }
 
     const user = await this.getUser(id);

@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { LocationType } from 'src/shared/enums/location-type.enum';
 import {
   Column,
   CreateDateColumn,
@@ -7,14 +9,12 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Supermarket } from './supermarket.entity';
-import { LocationType } from 'src/shared/enums/location-type.enum';
-import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Address {
   @ApiProperty({
     example: 1,
-    description: 'Address ID',
+    description: 'Dirección ID',
   })
   @PrimaryGeneratedColumn()
   id: number;
@@ -34,21 +34,21 @@ export class Address {
 
   @ApiProperty({
     example: '37',
-    description: 'Street number',
+    description: 'Número de la calle',
   })
   @Column()
   streetNumber: string;
 
   @ApiProperty({
     example: '4W',
-    description: 'Intersection number of the street',
+    description: 'Número de intersección de la calle',
   })
   @Column({ nullable: true })
   intersectionNumber: string;
 
   @ApiProperty({
     example: '05',
-    description: 'building street number',
+    description: 'número de la calle del edificio',
   })
   @Column({
     nullable: true,
@@ -56,8 +56,8 @@ export class Address {
   buildingNumber: string;
 
   @ApiProperty({
-    example: 'Second Floor',
-    description: 'Additional information',
+    example: 'Segundo piso',
+    description: 'Información complementaria',
   })
   @Column({
     nullable: true,
@@ -66,14 +66,14 @@ export class Address {
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
-    description: 'User creation date',
+    description: 'Fecha de creación del usuario',
   })
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
-    description: 'User update date',
+    description: 'Fecha de actualización del usuario',
   })
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;

@@ -20,15 +20,15 @@ export class CreateAddressDto {
   neighborhood: string;
 
   @ApiProperty({
-    example: 'street',
-    description: 'Location type',
+    example: 'calle',
+    description: 'Tipo de ubicación',
   })
-  @IsEnum(LocationType, { message: 'Invalid location type' })
+  @IsEnum(LocationType, { message: 'Tipo de ubicación no válido' })
   locationType: LocationType;
 
   @ApiProperty({
     example: '14A',
-    description: 'Street number',
+    description: 'Número de la calle',
   })
   @IsString()
   @IsNotEmpty()
@@ -36,7 +36,7 @@ export class CreateAddressDto {
 
   @ApiProperty({
     example: '4W',
-    description: 'Intersection number of the street',
+    description: 'Número de intersección de la calle',
   })
   @IsString()
   @IsOptional()
@@ -44,15 +44,15 @@ export class CreateAddressDto {
 
   @ApiProperty({
     example: '05',
-    description: 'building street number',
+    description: 'número de la calle del edificio',
   })
   @IsString()
   @IsOptional()
   buildingNumber: string;
 
   @ApiProperty({
-    example: 'Second Floor',
-    description: 'Additional information',
+    example: 'Segundo piso',
+    description: 'Información complementaria',
   })
   @IsOptional()
   @IsString()

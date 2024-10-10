@@ -4,10 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Category } from './entities/category.entity';
-import { Repository } from 'typeorm';
 import { SupermarketService } from 'src/supermarket/supermarket.service';
+import { Repository } from 'typeorm';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -23,7 +23,7 @@ export class CategoriesService {
   async findOne(id: number): Promise<Category> {
     const category = await this.categoryRepo.findOne({ where: { id } });
     if (!category) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
+      throw new NotFoundException(`Categoría con ID ${id} no encontrada`);
     }
     return;
   }
@@ -37,7 +37,7 @@ export class CategoriesService {
     });
     if (!category) {
       throw new NotFoundException(
-        `Category with ID ${id} not found in supermarket ${supermarketId}`,
+        `Categoría con ID ${id} no encontrada en supermercado ${supermarketId}`,
       );
     }
     return category;
@@ -52,7 +52,7 @@ export class CategoriesService {
 
     if (!supermarket) {
       throw new NotFoundException(
-        `Supermarket with ID ${category.supermarketId} not found`,
+        `Supermercado con ID ${category.supermarketId} no encontrado`,
       );
     }
 
@@ -65,7 +65,7 @@ export class CategoriesService {
 
     if (existingCategory) {
       throw new BadRequestException(
-        `Category with name ${category.name} already exists for this supermarket`,
+        `La categoría con el nombre ${category.name} ya existe para este supermercado.`,
       );
     }
 
@@ -86,7 +86,7 @@ export class CategoriesService {
   async update(id: number, category: UpdateCategoryDto): Promise<Category> {
     const existingCategory = await this.categoryRepo.findOne({ where: { id } });
     if (!existingCategory) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
+      throw new NotFoundException(`Categoría con ID ${id} no encontrada`);
     }
     return await this.categoryRepo.save({ ...category, id });
   }

@@ -1,18 +1,18 @@
-import { PredictionEntity } from './prediction.entity';
+import { Prediction } from './prediction.entity';
 
 describe('PredictionEntity', () => {
-  it('should be defined', () => {
-    expect(new PredictionEntity()).toBeDefined();
+  it('debe definirse', () => {
+    expect(new Prediction()).toBeDefined();
   });
 
-  it('should have the correct default properties', () => {
-    const prediction = new PredictionEntity();
+  it('debería tener las propiedades predeterminadas correctas', () => {
+    const prediction = new Prediction();
 
     expect(prediction).toHaveProperty('id');
-    expect(prediction).toHaveProperty('supermarket');
-    expect(prediction).toHaveProperty('fresh');
-    expect(prediction).toHaveProperty('halfFresh');
-    expect(prediction).toHaveProperty('soiled');
+    expect(prediction).toHaveProperty('supermercado');
+    expect(prediction).toHaveProperty('fresco');
+    expect(prediction).toHaveProperty('mediofresco');
+    expect(prediction).toHaveProperty('vencido');
     expect(prediction).toHaveProperty('fecha');
   });
 });
