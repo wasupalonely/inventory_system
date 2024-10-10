@@ -56,7 +56,6 @@ export class AddUserToSupermarketDto {
     example: 1,
     required: false,
   })
-  @IsOptional()
   @IsNumber()
   supermarketId: number;
 

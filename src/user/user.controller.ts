@@ -50,6 +50,15 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Delete('supermarket/:id')
+  @Roles(Role.Admin, Role.Owner)
+  @ApiResponse({ status: 204, description: 'User deleted successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  deleteUserFromSupermarket(@Param('id') id: number) {
+    return this.userService.deleteUserFromSupermarket(+id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(':id')
   @ApiResponse({ status: 200, type: User })
   @ApiResponse({ status: 400, description: 'Bad request' })

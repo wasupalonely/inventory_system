@@ -32,7 +32,7 @@ export class Supermarket {
   @Column()
   name: string;
 
-  @OneToOne(() => Address, (address) => address.supermarket)
+  @OneToOne(() => Address, (address) => address.supermarket, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn()
   address: Address;
 
@@ -40,19 +40,19 @@ export class Supermarket {
   @JoinColumn()
   owner: User;
 
-  @OneToMany(() => Category, (category) => category.supermarket)
+  @OneToMany(() => Category, (category) => category.supermarket, { cascade: true, onDelete: 'CASCADE' })
   categories: Category[];
 
-  @OneToMany(() => User, (user) => user.supermarket)
+  @OneToMany(() => User, (user) => user.supermarket, { cascade: true, onDelete: 'CASCADE' })
   users: User[];
 
-  @OneToMany(() => Product, (product) => product.supermarket)
+  @OneToMany(() => Product, (product) => product.supermarket, { cascade: true, onDelete: 'CASCADE' })
   products: Product[];
 
-  @OneToMany(() => Inventory, (inventory) => inventory.supermarket)
+  @OneToMany(() => Inventory, (inventory) => inventory.supermarket, { cascade: true, onDelete: 'CASCADE' })
   inventory: Inventory[];
 
-  @OneToMany(() => Sale, (sale) => sale.supermarket)
+  @OneToMany(() => Sale, (sale) => sale.supermarket, { cascade: true, onDelete: 'CASCADE' })
   sales: Sale[];
 
   @Column({ default: false })

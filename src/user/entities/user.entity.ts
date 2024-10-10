@@ -78,7 +78,9 @@ export class User {
   @Column({ default: false })
   isConfirmed: boolean;
 
-  @ManyToOne(() => Supermarket, (supermarket) => supermarket.users)
+  @ManyToOne(() => Supermarket, (supermarket) => supermarket.users, {
+    onDelete: 'CASCADE',
+  })
   supermarket: Supermarket;
 
   @OneToOne(() => Supermarket, (supermarket) => supermarket.owner)

@@ -44,6 +44,8 @@ export class SupermarketController {
     return this.supermarketService.getSupermarket(id);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.Owner)
   @Post()
   @ApiResponse({ status: 201, type: Supermarket })
   @ApiResponse({ status: 400, description: 'Supermarket already exists' })
@@ -53,7 +55,7 @@ export class SupermarketController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Owner)
   @Put(':id')
   @ApiResponse({ status: 200, type: Supermarket })
   @ApiResponse({ status: 404, description: 'Supermarket not found' })
@@ -66,7 +68,7 @@ export class SupermarketController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Owner)
   @Delete(':id')
   @ApiResponse({ status: 204 })
   @ApiResponse({ status: 404, description: 'Supermarket not found' })

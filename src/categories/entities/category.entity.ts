@@ -37,7 +37,9 @@ export class Category {
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
 
-  @ManyToOne(() => Supermarket, (supermarket) => supermarket.categories)
+  @ManyToOne(() => Supermarket, (supermarket) => supermarket.categories, {
+    onDelete: 'CASCADE',
+  })
   supermarket: Supermarket;
 
   @ApiProperty({
