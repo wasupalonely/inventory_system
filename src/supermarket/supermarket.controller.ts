@@ -10,16 +10,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/shared/guards/roles.guard';
-import { SupermarketService } from './supermarket.service';
 import { Roles } from 'src/shared/decorators/roles.decorators';
 import { Role } from 'src/shared/enums/roles.enum';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
 import {
-  CreateSupermarketDto,
-  UpdateSupermarketDto,
+  CreateSupermarketDto, UpdateSupermarketDto,
 } from './dto/supermarket.dto';
 import { Supermarket } from './entities/supermarket.entity';
+import { SupermarketService } from './supermarket.service';
 
 @ApiTags('Supermarket')
 @UseGuards(JwtAuthGuard)
@@ -39,15 +38,15 @@ export class SupermarketController {
   @Roles(Role.Admin, Role.Viewer)
   @Get(':id')
   @ApiResponse({ status: 200, type: Supermarket })
-  @ApiResponse({ status: 404, description: 'Supermarket not found' })
+  @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })
   getSupermarket(@Param('id') id: number) {
     return this.supermarketService.getSupermarket(id);
   }
 
   @Post()
   @ApiResponse({ status: 201, type: Supermarket })
-  @ApiResponse({ status: 400, description: 'Supermarket already exists' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'Ya existe un supermercado' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor' })
   createSupermarket(@Body() supermarket: CreateSupermarketDto) {
     return this.supermarketService.createSupermarket(supermarket);
   }
@@ -56,8 +55,8 @@ export class SupermarketController {
   @Roles(Role.Admin)
   @Put(':id')
   @ApiResponse({ status: 200, type: Supermarket })
-  @ApiResponse({ status: 404, description: 'Supermarket not found' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor' })
   updateSupermarket(
     @Param('id') id: number,
     @Body() supermarket: UpdateSupermarketDto,
@@ -69,7 +68,7 @@ export class SupermarketController {
   @Roles(Role.Admin)
   @Delete(':id')
   @ApiResponse({ status: 204 })
-  @ApiResponse({ status: 404, description: 'Supermarket not found' })
+  @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })
   deleteSupermarket(@Param('id') id: number) {
     return this.supermarketService.deleteSupermarket(id);
   }

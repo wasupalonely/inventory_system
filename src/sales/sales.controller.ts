@@ -1,12 +1,12 @@
-import { Controller, Post, Body, UseGuards, Param, Res } from '@nestjs/common';
-import { SalesService } from './sales.service';
-import { CreateSaleDto } from './dto/sale.dto';
+import { Body, Controller, Param, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { RolesGuard } from 'src/shared/guards/roles.guard';
-import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { Response } from 'express';
 import { Roles } from 'src/shared/decorators/roles.decorators';
 import { Role } from 'src/shared/enums/roles.enum';
-import { Response } from 'express';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { CreateSaleDto } from './dto/sale.dto';
+import { SalesService } from './sales.service';
 
 @ApiTags('Sales')
 @Controller('sales')
@@ -16,16 +16,16 @@ export class SalesController {
 
   @Roles(Role.Admin, Role.Cashier)
   @Post()
-  @ApiResponse({ status: 201, description: 'Sale created successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 201, description: 'Venta creada con éxito' })
+  @ApiResponse({ status: 400, description: 'Mala petición' })
   async createSale(@Body() createSaleDto: CreateSaleDto) {
     return this.salesService.createSale(createSaleDto);
   }
 
   @Roles(Role.Admin, Role.Cashier)
   @Post(':saleId/invoice')
-  @ApiResponse({ status: 201, description: 'Invoice generated successfully' })
-  @ApiResponse({ status: 404, description: 'Sale not found' })
+  @ApiResponse({ status: 201, description: 'Factura generada correctamente' })
+  @ApiResponse({ status: 404, description: 'Venta no encontrada' })
   async generateInvoice(
     @Param('saleId') saleId: number,
     @Res() response: Response,

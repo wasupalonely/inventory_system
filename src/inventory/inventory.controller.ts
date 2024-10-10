@@ -1,11 +1,11 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
-import { InventoryService } from './inventory.service';
-import { CreateInventoryDto } from './dto/inventory.dto';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { RolesGuard } from 'src/shared/guards/roles.guard';
-import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { Roles } from 'src/shared/decorators/roles.decorators';
 import { Role } from 'src/shared/enums/roles.enum';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { CreateInventoryDto } from './dto/inventory.dto';
+import { InventoryService } from './inventory.service';
 
 @ApiTags('Inventory')
 @Controller('inventory')
@@ -15,8 +15,8 @@ export class InventoryController {
 
   @Roles(Role.Admin, Role.Cashier)
   @Post('add-stock')
-  @ApiResponse({ status: 201, description: 'Stock added successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 201, description: 'Existencias añadidas correctamente' })
+  @ApiResponse({ status: 400, description: 'Mala petición' })
   async addStock(@Body() createInventoryDto: CreateInventoryDto) {
     return this.inventoryService.addStock(createInventoryDto);
   }
