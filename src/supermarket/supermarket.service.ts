@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -9,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Supermarket } from './entities/supermarket.entity';
 import { Repository } from 'typeorm';
 import {
+  CreateAddressDto,
   CreateSupermarketDto,
   UpdateSupermarketDto,
 } from './dto/supermarket.dto';
@@ -140,14 +142,20 @@ export class SupermarketService implements OnModuleInit {
   async createSupermarket(
     supermarket: CreateSupermarketDto,
   ): Promise<Supermarket> {
-    const address = this.addressRepo.create(supermarket.address);
-    await this.addressRepo.save(address);
     const owner = await this.userService.getUser(supermarket.ownerId);
     if (!owner) {
       throw new NotFoundException(
         `User with ID ${supermarket.ownerId} not found`,
       );
     }
+
+    if (owner.ownedSupermarket) {
+      throw new BadRequestException('El usuario ya posee un supermercado');
+    }
+
+    const addressStr: CreateAddressDto = supermarket.address;
+    const address = this.addressRepo.create(addressStr);
+    await this.addressRepo.save(address);
 
     const newSupermarket = this.supermarketRepo.create({
       ...supermarket,
@@ -162,6 +170,15 @@ export class SupermarketService implements OnModuleInit {
     supermarket: UpdateSupermarketDto,
   ): Promise<Supermarket> {
     const supermarketToUpdate = await this.getSupermarket(id);
+
+    if (supermarketToUpdate.address) {
+      await this.addressRepo.save({
+        id: supermarketToUpdate.address.id,
+        ...supermarketToUpdate.address,
+        ...supermarket.address,
+      });
+    }
+
     return await this.supermarketRepo.save({
       ...supermarketToUpdate,
       ...supermarket,
@@ -169,6 +186,12 @@ export class SupermarketService implements OnModuleInit {
   }
 
   async deleteSupermarket(id: number): Promise<void> {
+    const supermarket = await this.getSupermarket(id);
+
+    if (supermarket && supermarket.address) {
+      await this.addressRepo.delete(supermarket.address.id);
+    }
+
     await this.supermarketRepo.delete(id);
   }
 }

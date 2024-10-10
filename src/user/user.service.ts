@@ -107,9 +107,7 @@ export class UserService {
       throw new BadRequestException('No se puede agregar un administrador');
     }
 
-    const supermarket = await this.userRepo.findOne({
-      where: { id: user.supermarketId },
-    });
+    const supermarket = await this.supermarketService.getSupermarket(user.supermarketId);
 
     if (!supermarket) {
       throw new NotFoundException(
@@ -128,6 +126,18 @@ export class UserService {
     const userWithoutPassword = { ...userCreated, password: undefined };
 
     return userWithoutPassword;
+  }
+
+  async deleteUserFromSupermarket(id: number): Promise<{ success: boolean; message?: string }> {
+    const user = await this.getUser(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    await this.userRepo.delete(id);
+    return {
+      success: true,
+      message: `Usuario con ID ${id} borrado satisfactoriamente del supermercado`,
+    };
   }
 
   async deleteUser(id: number): Promise<boolean> {

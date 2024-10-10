@@ -61,8 +61,8 @@ export class AuthService {
       throw new BadRequestException('User already exists');
     }
 
-    if (userDto.role !== Role.Admin) {
-      throw new BadRequestException('Solo se puede registrar un administrador');
+    if (userDto.role !== Role.Owner) {
+      throw new BadRequestException('Solo se puede registrar el rol dueño');
     }
 
     userDto.password = bcrypt.hashSync(userDto.password, 10);
