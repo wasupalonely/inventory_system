@@ -1,11 +1,18 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { CategoriesModule } from './categories/categories.module';
+// import { PredictionsModule } from './predictions/predictions.module';
+import { ProductsModule } from './products/products.module';
+import { SalesModule } from './sales/sales.module';
 import { SupermarketModule } from './supermarket/supermarket.module';
 import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -16,11 +23,7 @@ import { AuthModule } from './auth/auth.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get('DB_USER'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
+        url: configService.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
         synchronize: true,
         entities: ['dist/**/entities/*.entity{.ts,.js}'],
@@ -30,6 +33,13 @@ import { AuthModule } from './auth/auth.module';
     SupermarketModule,
     UserModule,
     AuthModule,
+    // PredictionsModule,
+    ProductsModule,
+    CategoriesModule,
+    SalesModule,
+    MailModule,
+    InventoryModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
