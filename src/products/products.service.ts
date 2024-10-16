@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Product } from './entities/product.entity';
+import { CategoriesService } from 'src/categories/categories.service';
+import { SupermarketService } from 'src/supermarket/supermarket.service';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/product.dto';
-import { SupermarketService } from 'src/supermarket/supermarket.service';
-import { CategoriesService } from 'src/categories/categories.service';
+import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
@@ -24,7 +24,7 @@ export class ProductsService {
 
     if (!supermarket) {
       throw new NotFoundException(
-        `Supermarket with ID ${supermarketId} not found`,
+        `Supermercado con ID ${supermarketId} no encontrado`,
       );
     }
 
@@ -43,7 +43,7 @@ export class ProductsService {
 
     if (!category) {
       throw new NotFoundException(
-        `Category with ID ${product.categoryId} not found for supermarket ${product.supermarketId}`,
+        `Categoría con ID ${product.categoryId} no encontrada para supermercado ${product.supermarketId}`,
       );
     }
 
@@ -53,7 +53,7 @@ export class ProductsService {
 
     if (!supermarket) {
       throw new NotFoundException(
-        `Supermarket with ID ${product.supermarketId} not found`,
+        `Supermercado con ID ${product.supermarketId} no encontrado`,
       );
     }
 

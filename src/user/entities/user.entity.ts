@@ -24,56 +24,56 @@ export class User {
 
   @ApiProperty({
     example: 'John',
-    description: "User's first name",
+    description: "Primer nombre",
   })
   @Column()
   firstName: string;
 
   @ApiProperty({
     example: 'David',
-    description: "User's middle name",
+    description: "Segundo nombre",
   })
   @Column({ nullable: true })
   middleName: string;
 
   @ApiProperty({
     example: 'Doe',
-    description: "User's last name",
+    description: "Primer apellido",
   })
   @Column()
   lastName: string;
 
   @ApiProperty({
     example: 'Doe',
-    description: "User's second last name",
+    description: "Segundo apellido",
   })
   @Column({ nullable: true })
   secondLastName: string;
 
   @ApiProperty({
     example: 'uq0Jt@example.com',
-    description: 'User email',
+    description: 'Correo electrónico del usuario',
   })
   @Column({ unique: true })
   email: string;
 
   @ApiProperty({
     example: '123456789',
-    description: 'User phone number',
+    description: 'Número de teléfono del usuario',
   })
   @Column()
   phoneNumber: string;
 
   @ApiProperty({
     example: 'Password123@',
-    description: 'User password',
+    description: 'Contraseña de usuario',
   })
   @Column()
   password: string;
 
   @ApiProperty({
     example: true,
-    description: 'User account confirmation status',
+    description: 'Estado de confirmación de la cuenta de usuario',
   })
   @Column({ default: false })
   isConfirmed: boolean;
@@ -91,14 +91,14 @@ export class User {
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
-    description: 'User creation date',
+    description: 'Fecha de creación del usuario',
   })
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
-    description: 'User update date',
+    description: 'Fecha de actualización del usuario',
   })
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;

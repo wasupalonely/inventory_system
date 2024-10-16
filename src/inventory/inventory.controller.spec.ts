@@ -12,7 +12,7 @@ describe('InventoryController', () => {
     controller = module.get<InventoryController>(InventoryController);
   });
 
-  it('should be defined', () => {
+  it('Debe definirse', () => {
     expect(controller).toBeDefined();
   });
 });

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 
-describe('AuthController', () => {
+describe('Controlador de autenticación', () => {
   let controller: AuthController;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('AuthController', () => {
     controller = module.get<AuthController>(AuthController);
   });
 
-  it('should be defined', () => {
+  it('se debe definir', () => {
     expect(controller).toBeDefined();
   });
 });

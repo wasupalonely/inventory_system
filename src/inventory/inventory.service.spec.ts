@@ -12,7 +12,7 @@ describe('InventoryService', () => {
     service = module.get<InventoryService>(InventoryService);
   });
 
-  it('should be defined', () => {
+  it('debe definirse', () => {
     expect(service).toBeDefined();
   });
 });

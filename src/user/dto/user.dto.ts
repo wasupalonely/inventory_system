@@ -77,7 +77,7 @@ export class CreateUserDto {
   @Length(9, 20)
   @Matches(/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*\d).{9,20}$/, {
     message:
-      'Password must have between 9 and 20 characters, have at least 1 uppercase letter, 1 number and 1 special character.',
+      'La contraseña debe tener entre 9 y 20 caracteres, tener al menos 1 letra mayúscula, 1 número y 1 carácter especial.',
   })
   password: string;
 
@@ -88,7 +88,7 @@ export class CreateUserDto {
 
   @ApiProperty({ example: 'viewer' })
   @IsString()
-  @IsEnum(Role, { message: 'Role must be either viewer, cashier or admin' })
+  @IsEnum(Role, { message: 'El puesto debe ser de observador, cajero o administrador.' })
   @IsOptional()
   role: Role;
 }
