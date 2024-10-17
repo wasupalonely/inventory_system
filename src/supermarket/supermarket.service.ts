@@ -65,7 +65,7 @@ export class SupermarketService implements OnModuleInit {
       relations: ['address', 'owner', 'categories', 'users'],
     });
     if (!supermarket) {
-      throw new NotFoundException(`Supermarket with ID ${id} not found`);
+      throw new NotFoundException(`Supermercado con ID ${id} no encontrado`);
     }
     return supermarket;
   }
@@ -145,7 +145,7 @@ export class SupermarketService implements OnModuleInit {
     const owner = await this.userService.getUser(supermarket.ownerId);
     if (!owner) {
       throw new NotFoundException(
-        `User with ID ${supermarket.ownerId} not found`,
+        `Usuario con ID ${supermarket.ownerId} no encontrado`,
       );
     }
 
