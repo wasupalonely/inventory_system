@@ -34,7 +34,9 @@ export class AuthService {
     const userValidation = await this.validateUser(user.email, user.password);
 
     if (!userValidation) {
-      throw new BadRequestException('Credenciales inválidas para el inicio de sesión.');
+      throw new BadRequestException(
+        'Credenciales inválidas para el inicio de sesión.',
+      );
     }
 
     if (!userValidation.isConfirmed) {
@@ -68,7 +70,12 @@ export class AuthService {
     userDto.password = bcrypt.hashSync(userDto.password, 10);
     const user = await this.usersService.create(userDto);
 
-    const confirmationToken = this.jwtService.sign({ email: user.email });
+    const confirmationToken = this.jwtService.sign(
+      { email: user.email },
+      {
+        expiresIn: '60m',
+      },
+    );
 
     await this.tokenService.createToken(user.email, confirmationToken);
 
@@ -86,7 +93,7 @@ export class AuthService {
           <br>
           <p>Saludos,</p>
           <p>El equipo de soporte de MeatStock</p>
-       </div>`
+       </div>`,
     );
 
     return {
@@ -122,7 +129,12 @@ export class AuthService {
       throw new BadRequestException('Usuario no encontrado.');
     }
 
-    const resetToken = this.jwtService.sign({ email: user.email });
+    const resetToken = this.jwtService.sign(
+      { email: user.email },
+      {
+        expiresIn: '15m',
+      },
+    );
     await this.tokenService.createToken(user.email, resetToken);
 
     const resetUrl = `${this.configService.get('CLIENT_URL')}/auth/update-password?token=${resetToken}&id=${user.id}`;
@@ -139,10 +151,13 @@ export class AuthService {
           <br>
           <p>Saludos,</p>
           <p>El equipo de soporte de MeatStock</p>
-       </div>`
+       </div>`,
     );
 
-    return { message: 'Correo electrónico de restablecimiento de contraseña enviado. Por favor, revisa tu correo electrónico' };
+    return {
+      message:
+        'Correo electrónico de restablecimiento de contraseña enviado. Por favor, revisa tu correo electrónico',
+    };
   }
 
   async resetPassword(token: string, newPassword: string) {
