@@ -42,7 +42,7 @@ export class CategoriesController {
   }
 
   @Post()
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Owner)
   @ApiResponse({ status: 201, type: Category })
   @ApiResponse({ status: 400, description: 'Category already exists' })
   createCategory(@Body() category: CreateCategoryDto) {
@@ -50,7 +50,7 @@ export class CategoriesController {
   }
 
   @Put(':id')
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Owner)
   @ApiResponse({ status: 200, type: Category })
   @ApiResponse({ status: 404, description: 'Category not found' })
   updateCategory(@Param('id') id: number, @Body() category: CreateCategoryDto) {
@@ -58,7 +58,7 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Owner)
   @ApiResponse({ status: 204 })
   @ApiResponse({ status: 404, description: 'Category not found' })
   deleteCategory(@Param('id') id: number) {

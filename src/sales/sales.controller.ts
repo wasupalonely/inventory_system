@@ -14,7 +14,7 @@ import { Response } from 'express';
 export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
-  @Roles(Role.Admin, Role.Cashier)
+  @Roles(Role.Admin, Role.Cashier, Role.Owner)
   @Post()
   @ApiResponse({ status: 201, description: 'Sale created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -22,7 +22,7 @@ export class SalesController {
     return this.salesService.createSale(createSaleDto);
   }
 
-  @Roles(Role.Admin, Role.Cashier)
+  @Roles(Role.Admin, Role.Cashier, Role.Owner)
   @Post(':saleId/invoice')
   @ApiResponse({ status: 201, description: 'Invoice generated successfully' })
   @ApiResponse({ status: 404, description: 'Sale not found' })

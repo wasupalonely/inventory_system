@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
 
 export class CreateInventoryDto {
   @IsNumber()
@@ -11,7 +11,9 @@ export class CreateInventoryDto {
   supermarketId: number;
 
   @IsNumber()
+  @IsPositive()
   @IsNotEmpty()
+  @IsInt()
   stock: number;
 }
 

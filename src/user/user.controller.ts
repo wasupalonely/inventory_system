@@ -24,7 +24,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Owner)
   @Get()
   @ApiResponse({ status: 200, type: [User] })
   getUsers() {
@@ -32,7 +32,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Owner)
   @Get(':id')
   @ApiResponse({ status: 200, type: User })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -42,7 +42,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Owner)
   @ApiResponse({ status: 201, type: User })
   @ApiResponse({ status: 400, description: 'Bad request' })
   addUserToSupermarket(@Body() user: AddUserToSupermarketDto) {
@@ -69,7 +69,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Owner)
   @ApiResponse({ status: 204 })
   @ApiResponse({ status: 404, description: 'User not found' })
   async deleteUser(@Param('id') id: number) {

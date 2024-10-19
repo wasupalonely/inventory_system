@@ -107,7 +107,9 @@ export class UserService {
       throw new BadRequestException('No se puede agregar un administrador');
     }
 
-    const supermarket = await this.supermarketService.getSupermarket(user.supermarketId);
+    const supermarket = await this.supermarketService.getSupermarket(
+      user.supermarketId,
+    );
 
     if (!supermarket) {
       throw new NotFoundException(
@@ -128,7 +130,9 @@ export class UserService {
     return userWithoutPassword;
   }
 
-  async deleteUserFromSupermarket(id: number): Promise<{ success: boolean; message?: string }> {
+  async deleteUserFromSupermarket(
+    id: number,
+  ): Promise<{ success: boolean; message?: string }> {
     const user = await this.getUser(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -160,10 +164,13 @@ export class UserService {
   }
 
   async updatePassword(id: number, password: string): Promise<User> {
-    const passwordRequirements: RegExp = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*\d).{9,20}$/;
+    const passwordRequirements: RegExp =
+      /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*\d).{9,20}$/;
 
     if (!password.match(passwordRequirements)) {
-      throw new BadRequestException('Password must have between 9 and 20 characters, have at least 1 uppercase letter, 1 number and 1 special character.');
+      throw new BadRequestException(
+        'Password must have between 9 and 20 characters, have at least 1 uppercase letter, 1 number and 1 special character.',
+      );
     }
 
     const user = await this.getUser(id);
@@ -171,7 +178,10 @@ export class UserService {
     return await this.userRepo.save(user);
   }
 
-  async comparePasswordByUserId(id: number, password: string): Promise<boolean> {
+  async comparePasswordByUserId(
+    id: number,
+    password: string,
+  ): Promise<boolean> {
     const user = await this.getUser(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
