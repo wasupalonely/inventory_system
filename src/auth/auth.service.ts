@@ -70,7 +70,12 @@ export class AuthService {
     userDto.password = bcrypt.hashSync(userDto.password, 10);
     const user = await this.usersService.create(userDto);
 
-    const confirmationToken = this.jwtService.sign({ email: user.email });
+    const confirmationToken = this.jwtService.sign(
+      { email: user.email },
+      {
+        expiresIn: '60m',
+      },
+    );
 
     await this.tokenService.createToken(user.email, confirmationToken);
 
@@ -124,7 +129,12 @@ export class AuthService {
       throw new BadRequestException('Usuario no encontrado.');
     }
 
-    const resetToken = this.jwtService.sign({ email: user.email });
+    const resetToken = this.jwtService.sign(
+      { email: user.email },
+      {
+        expiresIn: '15m',
+      },
+    );
     await this.tokenService.createToken(user.email, resetToken);
 
     const resetUrl = `${this.configService.get('CLIENT_URL')}/auth/update-password?token=${resetToken}&id=${user.id}`;
