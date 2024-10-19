@@ -39,7 +39,7 @@ export class SupermarketController {
   @Roles(Role.Admin, Role.Viewer, Role.Owner)
   @Get(':id')
   @ApiResponse({ status: 200, type: Supermarket })
-  @ApiResponse({ status: 404, description: 'Supermarket not found' })
+  @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })
   getSupermarket(@Param('id') id: number) {
     return this.supermarketService.getSupermarket(id);
   }
@@ -48,8 +48,8 @@ export class SupermarketController {
   @Roles(Role.Owner)
   @Post()
   @ApiResponse({ status: 201, type: Supermarket })
-  @ApiResponse({ status: 400, description: 'Supermarket already exists' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'El supermercado ya existe' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor' })
   createSupermarket(@Body() supermarket: CreateSupermarketDto) {
     return this.supermarketService.createSupermarket(supermarket);
   }
@@ -58,8 +58,8 @@ export class SupermarketController {
   @Roles(Role.Owner)
   @Put(':id')
   @ApiResponse({ status: 200, type: Supermarket })
-  @ApiResponse({ status: 404, description: 'Supermarket not found' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor' })
   updateSupermarket(
     @Param('id') id: number,
     @Body() supermarket: UpdateSupermarketDto,
@@ -71,7 +71,7 @@ export class SupermarketController {
   @Roles(Role.Owner)
   @Delete(':id')
   @ApiResponse({ status: 204 })
-  @ApiResponse({ status: 404, description: 'Supermarket not found' })
+  @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })
   deleteSupermarket(@Param('id') id: number) {
     return this.supermarketService.deleteSupermarket(id);
   }

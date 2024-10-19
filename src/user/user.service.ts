@@ -35,7 +35,7 @@ export class UserService {
       relations: ['supermarket', 'ownedSupermarket'],
     });
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`Usuario con ${id} no encontrado`);
     }
     return user;
   }
@@ -51,7 +51,9 @@ export class UserService {
       relations: ['supermarket', 'ownedSupermarket'],
     });
     if (!user) {
-      throw new NotFoundException(`User with email ${identifier} not found`);
+      throw new NotFoundException(
+        `Usuario con email ${identifier} no encontrado`,
+      );
     }
     return user;
   }
@@ -81,7 +83,7 @@ export class UserService {
         );
         if (!supermarket) {
           throw new NotFoundException(
-            `Supermarket with ID ${user.supermarketId} not found`,
+            `Supermercado con ID ${user.supermarketId} no encontrado`,
           );
         }
 
@@ -100,7 +102,7 @@ export class UserService {
   async addUserToSupermarket(user: AddUserToSupermarketDto): Promise<User> {
     const userValidation = await this.validateUserExistence(user.email);
     if (userValidation) {
-      throw new BadRequestException('User already exists');
+      throw new BadRequestException('El usuario ya existe.');
     }
 
     if (user.role === Role.Admin) {
@@ -113,7 +115,7 @@ export class UserService {
 
     if (!supermarket) {
       throw new NotFoundException(
-        `Supermarket with ID ${user.supermarketId} not found`,
+        `Supermercado con ID ${user.supermarketId} no encontrado`,
       );
     }
 
@@ -135,7 +137,7 @@ export class UserService {
   ): Promise<{ success: boolean; message?: string }> {
     const user = await this.getUser(id);
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
     }
     await this.userRepo.delete(id);
     return {
@@ -148,7 +150,7 @@ export class UserService {
     try {
       const user = await this.getUser(id);
       if (!user) {
-        throw new NotFoundException(`User with ID ${id} not found`);
+        throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
       }
       await this.userRepo.delete(id);
       return true;
@@ -169,7 +171,7 @@ export class UserService {
 
     if (!password.match(passwordRequirements)) {
       throw new BadRequestException(
-        'Password must have between 9 and 20 characters, have at least 1 uppercase letter, 1 number and 1 special character.',
+        'La contraseña debe tener entre 9 y 20 caracteres, al menos 1 letra mayúscula, 1 número y 1 carácter especial.',
       );
     }
 
@@ -184,7 +186,7 @@ export class UserService {
   ): Promise<boolean> {
     const user = await this.getUser(id);
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
     }
     return bcrypt.compareSync(password, user.password);
   }

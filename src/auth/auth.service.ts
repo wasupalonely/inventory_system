@@ -34,11 +34,11 @@ export class AuthService {
     const userValidation = await this.validateUser(user.email, user.password);
 
     if (!userValidation) {
-      throw new BadRequestException('Invalid credentials for login');
+      throw new BadRequestException('Credenciales inválidas para el inicio de sesión.');
     }
 
     if (!userValidation.isConfirmed) {
-      throw new BadRequestException('Account not confirmed');
+      throw new BadRequestException('Cuenta no confirmada.');
     }
 
     const payload = {
@@ -58,7 +58,7 @@ export class AuthService {
       userDto.email,
     );
     if (userValidation) {
-      throw new BadRequestException('User already exists');
+      throw new BadRequestException('El usuario ya existe');
     }
 
     if (userDto.role !== Role.Owner) {
@@ -76,14 +76,22 @@ export class AuthService {
 
     await this.mailService.sendMail(
       user.email,
-      'Confirm your account',
-      `Please confirm your account by clicking the link: ${confirmationUrl}`,
-      `<p>Please confirm your account by clicking the link: <a href="${confirmationUrl}">Confirm Account</a></p>`,
+      'Confirma tu cuenta de MeatStock',
+      `Hola ${user.firstName},\n\n¡Bienvenido a MeatStock! Gracias por unirte a nuestra plataforma de gestión de inventarios de carne y frescura. Para activar tu cuenta y empezar a usar MeatStock, por favor confirma tu cuenta haciendo clic en el siguiente enlace: ${confirmationUrl}\n\nSi no solicitaste esta acción, puedes ignorar este mensaje.`,
+      `<div style="font-family: Arial, sans-serif; color: #333;">
+          <h2>Hola ${user.firstName},</h2>
+          <p>¡Gracias por registrarte en MeatStock! Estamos encantados de que te unas a nuestra plataforma de seguimiento de inventario y frescura de carne. Para activar tu cuenta y comenzar a aprovechar todo lo que ofrecemos, confirma tu correo electrónico haciendo clic en el siguiente enlace:</p>
+          <p><a href="${confirmationUrl}" style="color: #1a73e8; text-decoration: none;">Confirmar cuenta</a></p>
+          <p>Si no solicitaste esta acción, simplemente ignora este mensaje.</p>
+          <br>
+          <p>Saludos,</p>
+          <p>El equipo de soporte de MeatStock</p>
+       </div>`
     );
 
     return {
       message:
-        'User registered successfully. Please check your email for confirmation.',
+        'Usuario registrado exitosamente. Por favor, revisa tu correo electrónico para la confirmación.',
     };
   }
 
@@ -91,27 +99,27 @@ export class AuthService {
   async confirmAccount(token: string) {
     const tokenUsed = await this.tokenService.isTokenUsed(token);
     if (tokenUsed) {
-      throw new BadRequestException('Token has already been used.');
+      throw new BadRequestException('El token ya ha sido utilizado.');
     }
 
     const { email } = this.jwtService.verify(token);
     const user = await this.usersService.getUserByIdentifier(email);
 
     if (!user) {
-      throw new BadRequestException('Invalid token');
+      throw new BadRequestException('Token inválido');
     }
 
     await this.tokenService.markTokenAsUsed(token);
 
     await this.usersService.markUserAsConfirmed(user.id);
-    return { message: 'Account confirmed successfully.' };
+    return { message: 'Cuenta confirmada exitosamente.' };
   }
 
   // FORGOT PASSWORD
   async forgotPassword(email: string) {
     const user = await this.usersService.getUserByIdentifier(email);
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException('Usuario no encontrado.');
     }
 
     const resetToken = this.jwtService.sign({ email: user.email });
@@ -120,31 +128,40 @@ export class AuthService {
     const resetUrl = `${this.configService.get('CLIENT_URL')}/auth/update-password?token=${resetToken}&id=${user.id}`;
     await this.mailService.sendMail(
       user.email,
-      'Reset Password',
-      `Please reset your password by clicking the link: ${resetUrl}`,
-      `<p>Please reset your password by clicking the link: <a href="${resetUrl}">Reset Password</a></p>`,
+      'Solicitud para restablecer contraseña en MeatStock',
+      `Hola ${user.firstName},\n\nRecibimos una solicitud para restablecer la contraseña de tu cuenta en MeatStock. Si fuiste tú quien la solicitó, por favor, restablece tu contraseña haciendo clic en el siguiente enlace: ${resetUrl}\n\nSi no solicitaste el restablecimiento de la contraseña, por favor ignora este correo o contáctanos si tienes alguna duda.\n\nEste enlace expirará en 30 minutos por razones de seguridad.\n\nSaludos,\nEl equipo de soporte de MeatStock.`,
+      `<div style="font-family: Arial, sans-serif; color: #333;">
+          <h2>Hola ${user.firstName},</h2>
+          <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en MeatStock. Si fuiste tú quien solicitó el cambio, puedes restablecer tu contraseña haciendo clic en el siguiente enlace:</p>
+          <p><a href="${resetUrl}" style="color: #1a73e8; text-decoration: none;">Restablecer contraseña</a></p>
+          <p>Si no solicitaste el restablecimiento de la contraseña, puedes ignorar este correo o ponerte en contacto con nosotros si tienes alguna duda.</p>
+          <p><strong>Importante:</strong> El enlace para restablecer tu contraseña expirará en 30 minutos por razones de seguridad.</p>
+          <br>
+          <p>Saludos,</p>
+          <p>El equipo de soporte de MeatStock</p>
+       </div>`
     );
 
-    return { message: 'Password reset email sent. Please check your email.' };
+    return { message: 'Correo electrónico de restablecimiento de contraseña enviado. Por favor, revisa tu correo electrónico' };
   }
 
   async resetPassword(token: string, newPassword: string) {
     const tokenUsed = await this.tokenService.isTokenUsed(token);
     if (tokenUsed) {
-      throw new BadRequestException('Token has already been used.');
+      throw new BadRequestException('El token ya ha sido utilizado.');
     }
 
     const { email } = this.jwtService.verify(token);
     const user = await this.usersService.getUserByIdentifier(email);
 
     if (!user) {
-      throw new BadRequestException('Invalid token');
+      throw new BadRequestException('Token inválido');
     }
 
     await this.usersService.updatePassword(user.id, newPassword);
 
     await this.tokenService.markTokenAsUsed(token);
 
-    return { message: 'Password updated successfully.' };
+    return { message: 'Contraseña actualizada exitosamente.' };
   }
 }
