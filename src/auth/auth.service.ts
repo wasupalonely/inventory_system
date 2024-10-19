@@ -34,7 +34,9 @@ export class AuthService {
     const userValidation = await this.validateUser(user.email, user.password);
 
     if (!userValidation) {
-      throw new BadRequestException('Credenciales inválidas para el inicio de sesión.');
+      throw new BadRequestException(
+        'Credenciales inválidas para el inicio de sesión.',
+      );
     }
 
     if (!userValidation.isConfirmed) {
@@ -86,7 +88,7 @@ export class AuthService {
           <br>
           <p>Saludos,</p>
           <p>El equipo de soporte de MeatStock</p>
-       </div>`
+       </div>`,
     );
 
     return {
@@ -139,10 +141,13 @@ export class AuthService {
           <br>
           <p>Saludos,</p>
           <p>El equipo de soporte de MeatStock</p>
-       </div>`
+       </div>`,
     );
 
-    return { message: 'Correo electrónico de restablecimiento de contraseña enviado. Por favor, revisa tu correo electrónico' };
+    return {
+      message:
+        'Correo electrónico de restablecimiento de contraseña enviado. Por favor, revisa tu correo electrónico',
+    };
   }
 
   async resetPassword(token: string, newPassword: string) {
