@@ -36,7 +36,7 @@ export class SupermarketController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin, Role.Viewer)
+  @Roles(Role.Admin, Role.Viewer, Role.Owner)
   @Get(':id')
   @ApiResponse({ status: 200, type: Supermarket })
   @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })

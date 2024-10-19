@@ -51,7 +51,9 @@ export class UserService {
       relations: ['supermarket', 'ownedSupermarket'],
     });
     if (!user) {
-      throw new NotFoundException(`Usuario con email ${identifier} no encontrado`);
+      throw new NotFoundException(
+        `Usuario con email ${identifier} no encontrado`,
+      );
     }
     return user;
   }
@@ -107,7 +109,9 @@ export class UserService {
       throw new BadRequestException('No se puede agregar un administrador');
     }
 
-    const supermarket = await this.supermarketService.getSupermarket(user.supermarketId);
+    const supermarket = await this.supermarketService.getSupermarket(
+      user.supermarketId,
+    );
 
     if (!supermarket) {
       throw new NotFoundException(
@@ -128,7 +132,9 @@ export class UserService {
     return userWithoutPassword;
   }
 
-  async deleteUserFromSupermarket(id: number): Promise<{ success: boolean; message?: string }> {
+  async deleteUserFromSupermarket(
+    id: number,
+  ): Promise<{ success: boolean; message?: string }> {
     const user = await this.getUser(id);
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
@@ -160,10 +166,13 @@ export class UserService {
   }
 
   async updatePassword(id: number, password: string): Promise<User> {
-    const passwordRequirements: RegExp = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*\d).{9,20}$/;
+    const passwordRequirements: RegExp =
+      /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*\d).{9,20}$/;
 
     if (!password.match(passwordRequirements)) {
-      throw new BadRequestException('La contraseña debe tener entre 9 y 20 caracteres, al menos 1 letra mayúscula, 1 número y 1 carácter especial.');
+      throw new BadRequestException(
+        'La contraseña debe tener entre 9 y 20 caracteres, al menos 1 letra mayúscula, 1 número y 1 carácter especial.',
+      );
     }
 
     const user = await this.getUser(id);
@@ -171,7 +180,10 @@ export class UserService {
     return await this.userRepo.save(user);
   }
 
-  async comparePasswordByUserId(id: number, password: string): Promise<boolean> {
+  async comparePasswordByUserId(
+    id: number,
+    password: string,
+  ): Promise<boolean> {
     const user = await this.getUser(id);
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);

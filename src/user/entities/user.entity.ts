@@ -116,6 +116,6 @@ export class User {
   role: Role;
 
   getFullName?(): string {
-    return `${this.firstName}${this.middleName ?? ' '}${this.lastName} ${this.secondLastName ?? ''}`.trim();
+    return `${this.firstName}${this.middleName ?? ''} ${this.lastName} ${this.secondLastName ?? ''}`.trim();
   }
 }

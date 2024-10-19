@@ -13,11 +13,13 @@ import { Role } from 'src/shared/enums/roles.enum';
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
-  @Roles(Role.Admin, Role.Cashier)
+  @Roles(Role.Admin, Role.Cashier, Role.Owner)
   @Post('add-stock')
   @ApiResponse({ status: 201, description: 'Stock added successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async addStock(@Body() createInventoryDto: CreateInventoryDto) {
     return this.inventoryService.addStock(createInventoryDto);
   }
+
+  // ENDPOINT PARA OBTENER EL INVENTARIO COMPLETO DE UN SUPERMERCADO
 }
