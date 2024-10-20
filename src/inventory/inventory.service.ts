@@ -1,5 +1,5 @@
 // src/inventory/inventory.service.ts
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inventory } from './entities/inventory.entity';
@@ -49,5 +49,18 @@ export class InventoryService {
     }
 
     return this.inventoryRepository.save(inventory);
+  }
+
+  async getInventoryBySupermarket(id: number): Promise<Inventory[]> {
+    const inventory = await this.inventoryRepository.find({
+      where: { supermarket: { id } },
+      relations: ['product'],
+    });
+
+    if (!inventory) {
+      throw new NotFoundException('Supermercado no encontrado');
+    }
+
+    return inventory;
   }
 }

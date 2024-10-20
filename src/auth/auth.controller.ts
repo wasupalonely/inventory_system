@@ -1,18 +1,22 @@
 // src/auth/auth.controller.ts
-import { Controller, Post, Body, Query } from '@nestjs/common';
+import { Controller, Post, Body, Query, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginAuthDto } from './dto/login.dto';
 import { CreateUserDto } from 'src/user/dto/user.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+// import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
+// @SkipThrottle()
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // @Throttle({ default: { limit: 3, ttl: 300 } })
   @Post('login')
   @ApiResponse({ status: 200, description: 'Inicio de sesión exitoso' })
   @ApiResponse({ status: 400, description: 'Credenciales inválidas' })
+  // @SkipThrottle({ default: false })
   async login(@Body() req: LoginAuthDto) {
     return this.authService.login(req);
   }
@@ -33,19 +37,40 @@ export class AuthController {
   }
 
   @Post('forgot-password')
-  @ApiResponse({ status: 200, description: 'Correo electrónico de restablecimiento de contraseña enviado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Correo electrónico de restablecimiento de contraseña enviado',
+  })
   @ApiResponse({ status: 400, description: 'Usuario no encontrado' })
   async forgotPassword(@Body('email') email: string) {
     return this.authService.forgotPassword(email);
   }
 
   @Post('reset-password')
-  @ApiResponse({ status: 200, description: 'Contraseña actualizada exitosamente' })
+  @ApiResponse({
+    status: 200,
+    description: 'Contraseña actualizada exitosamente',
+  })
   @ApiResponse({ status: 400, description: 'Token inválido' })
   async resetPassword(
     @Query('token') token: string,
     @Body('password') password: string,
   ) {
     return this.authService.resetPassword(token, password);
+  }
+
+  @Post('resend-confirmation/:userId')
+  @ApiResponse({
+    status: 200,
+    description: 'Correo de confirmación enviado exitosamente.',
+  })
+  @ApiResponse({ status: 400, description: 'Usuario no encontrado' })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Hubo un problema al enviar el correo. Por favor, intenta nuevamente.',
+  })
+  async resendConfirmationEmail(@Param('userId') userId: number) {
+    return this.authService.sendConfirmationEmail(userId);
   }
 }

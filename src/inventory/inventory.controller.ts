@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { CreateInventoryDto } from './dto/inventory.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -6,6 +6,7 @@ import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { Roles } from 'src/shared/decorators/roles.decorators';
 import { Role } from 'src/shared/enums/roles.enum';
+import { Inventory } from './entities/inventory.entity';
 
 @ApiTags('Inventory')
 @Controller('inventory')
@@ -22,4 +23,14 @@ export class InventoryController {
   }
 
   // ENDPOINT PARA OBTENER EL INVENTARIO COMPLETO DE UN SUPERMERCADO
+  @Get('supermarket/:id')
+  @ApiResponse({
+    status: 200,
+    description: 'Inventory retrieved successfully',
+    type: [Inventory],
+  })
+  @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })
+  async getInventoryBySupermarket(id: number): Promise<Inventory[]> {
+    return this.inventoryService.getInventoryBySupermarket(id);
+  }
 }
