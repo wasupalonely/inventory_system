@@ -32,7 +32,6 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Owner)
   @Get(':id')
   @ApiResponse({ status: 200, type: User })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })

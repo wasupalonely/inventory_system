@@ -13,9 +13,17 @@ import { UserModule } from './user/user.module';
 import { MailModule } from './mail/mail.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ReportsModule } from './reports/reports.module';
+// import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+// import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
+    // ThrottlerModule.forRoot([
+    //   {
+    //     ttl: 300,
+    //     limit: 1,
+    //   },
+    // ]),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -42,6 +50,12 @@ import { ReportsModule } from './reports/reports.module';
     ReportsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ThrottlerGuard,
+    // },
+  ],
 })
 export class AppModule {}

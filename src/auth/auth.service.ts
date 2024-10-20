@@ -1,5 +1,9 @@
 // src/auth/auth.service.ts
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from 'src/user/dto/user.dto';
@@ -55,6 +59,53 @@ export class AuthService {
     };
   }
 
+  async sendConfirmationEmail(userId: number) {
+    try {
+      const user = await this.usersService.getUser(userId);
+      console.log('🚀 ~ AuthService ~ sendConfirmationEmail ~ user:', user);
+
+      const confirmationToken = this.jwtService.sign(
+        { email: user.email },
+        {
+          expiresIn: '60m',
+        },
+      );
+
+      await this.tokenService.createToken(user.email, confirmationToken);
+
+      const confirmationUrl = `${this.configService.get('CLIENT_URL')}/auth/confirm?token=${confirmationToken}`;
+
+      await this.mailService.sendMail(
+        user.email,
+        'Confirma tu cuenta de MeatStock',
+        `Hola ${user.firstName},\n\n¡Bienvenido a MeatStock! Gracias por unirte a nuestra plataforma de gestión de inventarios de carne y frescura. Para activar tu cuenta y empezar a usar MeatStock, por favor confirma tu cuenta haciendo clic en el siguiente enlace: ${confirmationUrl}\n\nSi no solicitaste esta acción, puedes ignorar este mensaje.`,
+        `<div style="font-family: Arial, sans-serif; color: #333;">
+            <h2>Hola ${user.firstName},</h2>
+            <p>¡Gracias por registrarte en MeatStock! Estamos encantados de que te unas a nuestra plataforma de seguimiento de inventario y frescura de carne. Para activar tu cuenta y comenzar a aprovechar todo lo que ofrecemos, confirma tu correo electrónico haciendo clic en el siguiente enlace:</p>
+            <p><a href="${confirmationUrl}" style="color: #1a73e8; text-decoration: none;">Confirmar cuenta</a></p>
+            <p>Si no solicitaste esta acción, simplemente ignora este mensaje.</p>
+            <br>
+            <p>Saludos,</p>
+            <p>El equipo de soporte de MeatStock</p>
+         </div>`,
+      );
+
+      return {
+        message: 'Correo de confirmación enviado exitosamente.',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error.response && error.response.status === 500) {
+        throw new Error(
+          'Hubo un problema al enviar el correo. Por favor, intenta nuevamente.',
+        );
+      } else {
+        throw new Error('Ha ocurrido un error inesperado.');
+      }
+    }
+  }
+
   async register(userDto: CreateUserDto) {
     const userValidation = await this.usersService.validateUserExistence(
       userDto.email,
@@ -70,31 +121,7 @@ export class AuthService {
     userDto.password = bcrypt.hashSync(userDto.password, 10);
     const user = await this.usersService.create(userDto);
 
-    const confirmationToken = this.jwtService.sign(
-      { email: user.email },
-      {
-        expiresIn: '60m',
-      },
-    );
-
-    await this.tokenService.createToken(user.email, confirmationToken);
-
-    const confirmationUrl = `${this.configService.get('CLIENT_URL')}/auth/confirm?token=${confirmationToken}`;
-
-    await this.mailService.sendMail(
-      user.email,
-      'Confirma tu cuenta de MeatStock',
-      `Hola ${user.firstName},\n\n¡Bienvenido a MeatStock! Gracias por unirte a nuestra plataforma de gestión de inventarios de carne y frescura. Para activar tu cuenta y empezar a usar MeatStock, por favor confirma tu cuenta haciendo clic en el siguiente enlace: ${confirmationUrl}\n\nSi no solicitaste esta acción, puedes ignorar este mensaje.`,
-      `<div style="font-family: Arial, sans-serif; color: #333;">
-          <h2>Hola ${user.firstName},</h2>
-          <p>¡Gracias por registrarte en MeatStock! Estamos encantados de que te unas a nuestra plataforma de seguimiento de inventario y frescura de carne. Para activar tu cuenta y comenzar a aprovechar todo lo que ofrecemos, confirma tu correo electrónico haciendo clic en el siguiente enlace:</p>
-          <p><a href="${confirmationUrl}" style="color: #1a73e8; text-decoration: none;">Confirmar cuenta</a></p>
-          <p>Si no solicitaste esta acción, simplemente ignora este mensaje.</p>
-          <br>
-          <p>Saludos,</p>
-          <p>El equipo de soporte de MeatStock</p>
-       </div>`,
-    );
+    await this.sendConfirmationEmail(user.id);
 
     return {
       message:
