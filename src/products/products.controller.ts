@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { ProductsService } from './products.service';
@@ -35,6 +44,23 @@ export class ProductsController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   createProduct(@Body() product: CreateProductDto) {
     return this.productsService.create(product);
+  }
+
+  @Put(':id')
+  @ApiResponse({ status: 200, type: Product })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  updateProduct(@Param('id') id: number, @Body() product: CreateProductDto) {
+    return this.productsService.update(id, product);
+  }
+
+  @Delete(':id')
+  @ApiResponse({
+    status: 200,
+    type: Object,
+  })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  deleteProduct(@Param('id') id: number): Promise<{ message: string }> {
+    return this.productsService.delete(id);
   }
 
   //   @Get('category/:categoryId')

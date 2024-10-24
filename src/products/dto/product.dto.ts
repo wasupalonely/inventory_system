@@ -23,4 +23,4 @@ export class CreateProductDto {
   supermarketId: number;
 }
 
-export class UpdateCategoryDto extends PartialType(CreateProductDto) {}
+export class UpdateProductDto extends PartialType(CreateProductDto) {}
