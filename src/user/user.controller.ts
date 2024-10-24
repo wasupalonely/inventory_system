@@ -32,6 +32,14 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Owner, Role.Viewer)
+  @Get('supermarket/:id')
+  @ApiResponse({ status: 200, type: [User] })
+  getUsersBySupermarketId(@Param('id') supermarketId: number) {
+    return this.userService.getUsersBySupermarketId(supermarketId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get(':id')
   @ApiResponse({ status: 200, type: User })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
