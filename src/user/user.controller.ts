@@ -24,7 +24,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Owner)
+  // @Roles(Role.Admin, Role.Owner, Role.Viewer, Role)
   @Get()
   @ApiResponse({ status: 200, type: [User] })
   getUsers() {
@@ -33,9 +33,9 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Owner, Role.Viewer)
-  @Get('supermarket/:id')
+  @Get('supermarket/:supermarketId')
   @ApiResponse({ status: 200, type: [User] })
-  getUsersBySupermarketId(@Param('id') supermarketId: number) {
+  getUsersBySupermarketId(@Param('supermarketId') supermarketId: number) {
     return this.userService.getUsersBySupermarketId(supermarketId);
   }
 
