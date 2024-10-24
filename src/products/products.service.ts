@@ -73,6 +73,21 @@ export class ProductsService {
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
+
+    if (product.categoryId) {
+      const category =
+        await this.categoryService.getCategoryByIdAndSupermarketId(
+          product.categoryId,
+          existingProduct.supermarket.id,
+        );
+      if (!category) {
+        throw new NotFoundException(
+          `Category with ID ${product.categoryId} not found for supermarket ${existingProduct.supermarket.id}`,
+        );
+      }
+      existingProduct.category = category;
+    }
+
     return await this.productRepo.save({
       ...product,
       id,

@@ -12,7 +12,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
-import { CreateProductDto } from './dto/product.dto';
+import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 
 @ApiTags('Products')
 @UseGuards(JwtAuthGuard)
@@ -49,7 +49,7 @@ export class ProductsController {
   @Put(':id')
   @ApiResponse({ status: 200, type: Product })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  updateProduct(@Param('id') id: number, @Body() product: CreateProductDto) {
+  updateProduct(@Param('id') id: number, @Body() product: UpdateProductDto) {
     return this.productsService.update(id, product);
   }
 
