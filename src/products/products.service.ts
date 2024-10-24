@@ -15,7 +15,9 @@ export class ProductsService {
   ) {}
 
   async findAll(): Promise<Product[]> {
-    return await this.productRepo.find();
+    return await this.productRepo.find({
+      relations: ['category'],
+    });
   }
 
   async findBySupermarketId(supermarketId: number): Promise<Product[]> {
