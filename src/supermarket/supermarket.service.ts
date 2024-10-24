@@ -19,13 +19,22 @@ import { CronJob } from 'cron';
 import { UserService } from 'src/user/user.service';
 import { Address } from './entities/address.entity';
 import * as moment from 'moment';
+import { importDynamic } from 'src/shared/utils';
+import { ScheduleFrequency } from 'src/shared/enums/schedule-frequency';
 // import * as fs from 'fs';
 // import * as path from 'path';
-// import { importDynamic } from 'src/shared/utils';
 
 @Injectable()
 export class SupermarketService implements OnModuleInit {
   private app: any;
+  private testModeExecutions: Map<number, number> = new Map();
+  private readonly TEST_MODE_LIMIT = 10;
+  private readonly meatImages = [
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1729543375/semi-fresh_xtoukp.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1729543375/fresh_txjchq.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1729543375/rotten_meat_pjpppc.jpg',
+  ];
+
   constructor(
     @InjectRepository(Supermarket)
     private supermarketRepo: Repository<Supermarket>,
@@ -37,9 +46,8 @@ export class SupermarketService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    // const { Client } = await importDynamic('@gradio/client');
-
-    // this.app = await Client.connect('aicafee/fresh_vs_old_meat');
+    const { Client } = await importDynamic('@gradio/client');
+    this.app = await Client.connect('ItsEnder/freshness_detection');
     const supermarkets = await this.findAllWithCronEnabled();
 
     supermarkets.forEach((supermarket) => {
@@ -73,9 +81,11 @@ export class SupermarketService implements OnModuleInit {
   async updateCronStatus(
     supermarketId: number,
     cronjobEnabled: boolean,
+    scheduleFrequency: ScheduleFrequency,
   ): Promise<void> {
     await this.supermarketRepo.update(supermarketId, {
       cronjobEnabled,
+      scheduleFrequency,
       startTime: new Date(),
     });
     if (cronjobEnabled) {
@@ -85,41 +95,119 @@ export class SupermarketService implements OnModuleInit {
     }
   }
 
+  // async startCronJob(supermarketId: number) {
+  //   // const { handle_file } = await importDynamic('@gradio/client');
+  //   const supermarket = await this.getSupermarket(supermarketId);
+  //   console.log(
+  //     '🚀 ~ SupermarketService ~ startCronJob ~ supermarket:',
+  //     supermarket,
+  //   );
+
+  //   const startTime = moment(supermarket.startTime);
+
+  //   // HORA
+  //   // const cronExpression = `${startTime.seconds()} ${startTime.minutes()} ${startTime.hours()} * * *`;
+
+  //   // MINUTO PARA TEST
+  //   const cronExpression = `${startTime.seconds()} * * * * *`;
+
+  //   const job = new CronJob(cronExpression, async () => {
+  //     console.log(
+  //       `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
+  //     );
+
+  //     // const response_0 = await fetch(
+  //     //   'https://raw.githubusercontent.com/gradio-app/gradio/main/test/test_files/bus.png',
+  //     // );
+  //     // const exampleImage = await response_0.blob();
+
+  //     // const prediction = await this.app.predict('/predict', [
+  //     //   handle_file(exampleImage),
+  //     // ]);
+
+  //     // console.log('PREDICTION ---->', prediction.data);
+
+  //     // Working on this
+  //     // const response = await this.callFastApi(supermarketId);
+  //     // console.log('🚀 ~ SupermarketService ~ job ~ response:', response);
+  //   });
+
+  //   this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);
+  //   job.start();
+  // }
+
+  private getCronExpression(
+    frequency: ScheduleFrequency,
+    startTime: Date,
+  ): string {
+    const time = moment(startTime);
+    switch (frequency) {
+      case ScheduleFrequency.EVERY_MINUTE:
+        return '* * * * *';
+      case ScheduleFrequency.DAILY:
+        return `${time.minutes()} ${time.hours()} * * *`;
+      case ScheduleFrequency.TWICE_DAILY:
+        return `${time.minutes()} ${time.hours()},${(time.hours() + 12) % 24} * * *`;
+      case ScheduleFrequency.WEEKLY:
+        return `${time.minutes()} ${time.hours()} * * ${time.day()}`;
+      case ScheduleFrequency.TWICE_WEEKLY:
+        return `${time.minutes()} ${time.hours()} * * ${time.day()},${(time.day() + 3) % 7}`;
+      case ScheduleFrequency.MONTHLY:
+        return `${time.minutes()} ${time.hours()} ${time.date()} * *`;
+      default:
+        throw new Error('Invalid schedule frequency');
+    }
+  }
+
   async startCronJob(supermarketId: number) {
-    // const { handle_file } = await importDynamic('@gradio/client');
+    const { handle_file } = await importDynamic('@gradio/client');
     const supermarket = await this.getSupermarket(supermarketId);
-    console.log(
-      '🚀 ~ SupermarketService ~ startCronJob ~ supermarket:',
-      supermarket,
+
+    const cronExpression = this.getCronExpression(
+      supermarket.scheduleFrequency,
+      supermarket.startTime,
     );
-
-    const startTime = moment(supermarket.startTime);
-
-    // HORA
-    // const cronExpression = `${startTime.seconds()} ${startTime.minutes()} ${startTime.hours()} * * *`;
-
-    // MINUTO PARA TEST
-    const cronExpression = `${startTime.seconds()} * * * * *`;
 
     const job = new CronJob(cronExpression, async () => {
       console.log(
         `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
       );
+      if (supermarket.scheduleFrequency === ScheduleFrequency.EVERY_MINUTE) {
+        const executions = this.testModeExecutions.get(supermarketId) || 0;
+        if (executions >= this.TEST_MODE_LIMIT) {
+          console.log(
+            `Test mode limit reached for supermarket ${supermarketId}. Changing to daily schedule.`,
+          );
+          await this.updateCronStatus(
+            supermarketId,
+            true,
+            ScheduleFrequency.DAILY,
+          );
+          return;
+        }
+        this.testModeExecutions.set(supermarketId, executions + 1);
+      }
 
-      // const response_0 = await fetch(
-      //   'https://raw.githubusercontent.com/gradio-app/gradio/main/test/test_files/bus.png',
-      // );
-      // const exampleImage = await response_0.blob();
+      try {
+        const randomImageUrl =
+          this.meatImages[Math.floor(Math.random() * this.meatImages.length)];
 
-      // const prediction = await this.app.predict('/predict', [
-      //   handle_file(exampleImage),
-      // ]);
+        console.log(`Usando imagen: ${randomImageUrl}`);
 
-      // console.log('PREDICTION ---->', prediction.data);
+        const response = await fetch(randomImageUrl);
+        const imageBlob = await response.blob();
 
-      // Working on this
-      // const response = await this.callFastApi(supermarketId);
-      // console.log('🚀 ~ SupermarketService ~ job ~ response:', response);
+        const prediction = await this.app.predict('/predict', [
+          handle_file(imageBlob),
+        ]);
+
+        console.log('PREDICTION ---->', prediction.data);
+
+        // Aquí puedes agregar la lógica para manejar la predicción
+        // Por ejemplo, guardar en la base de datos, enviar notificaciones, etc.
+      } catch (error) {
+        console.error('Error al hacer la predicción:', error);
+      }
     });
 
     this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);

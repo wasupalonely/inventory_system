@@ -9,6 +9,7 @@ import {
   IsString,
 } from 'class-validator';
 import { LocationType } from 'src/shared/enums/location-type.enum';
+import { ScheduleFrequency } from 'src/shared/enums/schedule-frequency';
 
 export class CreateAddressDto {
   @ApiProperty({
@@ -78,6 +79,11 @@ export class CreateSupermarketDto {
   @IsNotEmpty()
   @IsObject()
   address: CreateAddressDto;
+
+  @ApiProperty({ example: 'DAILY', default: 'DAILY' })
+  @IsEnum(ScheduleFrequency, { message: 'Frecuencia no válida' })
+  @IsOptional()
+  scheduleFrequency: ScheduleFrequency;
 
   // @ApiProperty({ example: fasle, required: false })
   // @IsOptional()

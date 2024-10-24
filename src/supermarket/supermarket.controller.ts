@@ -20,6 +20,7 @@ import {
   UpdateSupermarketDto,
 } from './dto/supermarket.dto';
 import { Supermarket } from './entities/supermarket.entity';
+import { ScheduleFrequency } from 'src/shared/enums/schedule-frequency';
 
 @ApiTags('Supermarket')
 @UseGuards(JwtAuthGuard)
@@ -28,7 +29,7 @@ export class SupermarketController {
   constructor(private readonly supermarketService: SupermarketService) {}
 
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin, Role.Viewer)
+  @Roles(Role.Admin, Role.Viewer, Role.Owner)
   @Get()
   @ApiResponse({ status: 200, type: [Supermarket] })
   getSupermarkets() {
@@ -55,7 +56,7 @@ export class SupermarketController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(Role.Owner)
+  @Roles(Role.Owner, Role.Admin)
   @Put(':id')
   @ApiResponse({ status: 200, type: Supermarket })
   @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })
@@ -77,18 +78,26 @@ export class SupermarketController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Owner, Role.Admin)
   @Patch(':supermarketId/enable-cron')
   async enableCronJob(@Param('supermarketId') supermarketId: number) {
-    await this.supermarketService.updateCronStatus(supermarketId, true);
+    await this.supermarketService.updateCronStatus(
+      supermarketId,
+      true,
+      ScheduleFrequency.DAILY,
+    );
     return { message: 'Cronjob habilitado' };
   }
 
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Owner)
   @Patch(':supermarketId/disable-cron')
   async disableCronJob(@Param('supermarketId') supermarketId: number) {
-    await this.supermarketService.updateCronStatus(supermarketId, false);
+    await this.supermarketService.updateCronStatus(
+      supermarketId,
+      false,
+      ScheduleFrequency.DAILY,
+    );
     return { message: 'Cronjob deshabilitado' };
   }
 }

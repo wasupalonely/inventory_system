@@ -15,6 +15,7 @@ import { Category } from 'src/categories/entities/category.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { Sale } from 'src/sales/entities/sale.entity';
+import { ScheduleFrequency } from 'src/shared/enums/schedule-frequency';
 
 @Entity({ name: 'supermarket' })
 export class Supermarket {
@@ -32,7 +33,10 @@ export class Supermarket {
   @Column()
   name: string;
 
-  @OneToOne(() => Address, (address) => address.supermarket, { cascade: true, onDelete: 'CASCADE' })
+  @OneToOne(() => Address, (address) => address.supermarket, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   address: Address;
 
@@ -40,23 +44,45 @@ export class Supermarket {
   @JoinColumn()
   owner: User;
 
-  @OneToMany(() => Category, (category) => category.supermarket, { cascade: true, onDelete: 'CASCADE' })
+  @OneToMany(() => Category, (category) => category.supermarket, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   categories: Category[];
 
-  @OneToMany(() => User, (user) => user.supermarket, { cascade: true, onDelete: 'CASCADE' })
+  @OneToMany(() => User, (user) => user.supermarket, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   users: User[];
 
-  @OneToMany(() => Product, (product) => product.supermarket, { cascade: true, onDelete: 'CASCADE' })
+  @OneToMany(() => Product, (product) => product.supermarket, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   products: Product[];
 
-  @OneToMany(() => Inventory, (inventory) => inventory.supermarket, { cascade: true, onDelete: 'CASCADE' })
+  @OneToMany(() => Inventory, (inventory) => inventory.supermarket, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   inventory: Inventory[];
 
-  @OneToMany(() => Sale, (sale) => sale.supermarket, { cascade: true, onDelete: 'CASCADE' })
+  @OneToMany(() => Sale, (sale) => sale.supermarket, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   sales: Sale[];
 
   @Column({ default: false })
   cronjobEnabled: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: ScheduleFrequency,
+    default: ScheduleFrequency.DAILY,
+  })
+  scheduleFrequency: ScheduleFrequency;
 
   @Column({ type: 'timestamp', nullable: true })
   startTime: Date;

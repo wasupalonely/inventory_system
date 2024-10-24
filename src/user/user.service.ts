@@ -29,6 +29,14 @@ export class UserService {
     return await this.userRepo.find();
   }
 
+  async getUsersBySupermarketId(supermarketId: number): Promise<User[]> {
+    await this.supermarketService.getSupermarket(supermarketId);
+
+    return await this.userRepo.find({
+      where: { supermarket: { id: supermarketId } },
+    });
+  }
+
   async getUser(id: number): Promise<User> {
     const user = await this.userRepo.findOne({
       where: { id },
