@@ -113,8 +113,8 @@ export class UserService {
       throw new BadRequestException('El usuario ya existe.');
     }
 
-    if (user.role === Role.Admin) {
-      throw new BadRequestException('No se puede agregar un administrador');
+    if (user.role === Role.Owner) {
+      throw new BadRequestException('No se puede agregar un dueño');
     }
 
     const supermarket = await this.supermarketService.getSupermarket(
