@@ -32,6 +32,7 @@ export class ProductsService {
 
     return await this.productRepo.find({
       where: { supermarket: { id: supermarketId } },
+      relations: ['category'],
     });
   }
 
