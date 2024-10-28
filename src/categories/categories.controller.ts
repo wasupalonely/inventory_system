@@ -12,7 +12,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { CategoriesService } from './categories.service';
 import { Category } from './entities/category.entity';
-import { CreateCategoryDto } from './dto/category.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { Role } from 'src/shared/enums/roles.enum';
 import { Roles } from 'src/shared/decorators/roles.decorators';
@@ -53,7 +53,7 @@ export class CategoriesController {
   @Roles(Role.Admin, Role.Owner)
   @ApiResponse({ status: 200, type: Category })
   @ApiResponse({ status: 404, description: 'Category not found' })
-  updateCategory(@Param('id') id: number, @Body() category: CreateCategoryDto) {
+  updateCategory(@Param('id') id: number, @Body() category: UpdateCategoryDto) {
     return this.categoriesService.update(id, category);
   }
 
