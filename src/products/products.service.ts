@@ -30,7 +30,9 @@ export class ProductsService {
       );
     }
 
-    return await this.productRepo.find({ where: { supermarket } });
+    return await this.productRepo.find({
+      where: { supermarket: { id: supermarketId } },
+    });
   }
 
   async findOne(id: number): Promise<Product> {
@@ -69,7 +71,12 @@ export class ProductsService {
   }
 
   async update(id: number, product: UpdateProductDto): Promise<Product> {
-    const existingProduct = await this.productRepo.findOne({ where: { id } });
+    // Verifica si el producto existe
+    const existingProduct = await this.productRepo.findOne({
+      where: { id },
+      relations: ['category', 'supermarket'],
+    });
+
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
@@ -88,10 +95,14 @@ export class ProductsService {
       existingProduct.category = category;
     }
 
-    return await this.productRepo.save({
+    await this.productRepo.update(id, {
       ...product,
-      id,
-      supermarketId: existingProduct.supermarket.id,
+      supermarket: existingProduct.supermarket,
+    });
+
+    return await this.productRepo.findOne({
+      where: { id },
+      relations: ['category', 'supermarket'],
     });
   }
 

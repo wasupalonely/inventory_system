@@ -29,7 +29,7 @@ export class Product {
     example: 'Roman lettuce',
     description: 'Product description',
   })
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
   @ApiProperty({

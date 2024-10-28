@@ -13,8 +13,11 @@ import { UserModule } from './user/user.module';
 import { MailModule } from './mail/mail.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ReportsModule } from './reports/reports.module';
+import { CloudinaryConfig } from './config/cloudinary.config';
 // import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 // import { APP_GUARD } from '@nestjs/core';
+import { UploadModule } from './upload/upload.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -48,10 +51,13 @@ import { ReportsModule } from './reports/reports.module';
     MailModule,
     InventoryModule,
     ReportsModule,
+    UploadModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    CloudinaryConfig,
     // {
     //   provide: APP_GUARD,
     //   useClass: ThrottlerGuard,

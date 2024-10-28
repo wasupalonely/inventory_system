@@ -31,7 +31,7 @@ export class Category {
     example: 'Fruits category',
     description: 'THe description of the category',
   })
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
   @OneToMany(() => Product, (product) => product.category)

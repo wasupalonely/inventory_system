@@ -25,7 +25,7 @@ export class CategoriesService {
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
-    return;
+    return category;
   }
 
   async getCategoryByIdAndSupermarketId(
@@ -88,7 +88,10 @@ export class CategoriesService {
     if (!existingCategory) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
-    return await this.categoryRepo.save({ ...category, id });
+
+    await this.categoryRepo.update(id, category);
+
+    return await this.categoryRepo.findOne({ where: { id } });
   }
 
   async delete(id: number): Promise<void> {
