@@ -13,9 +13,12 @@ import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { Role } from 'src/shared/enums/roles.enum';
+import { Roles } from 'src/shared/decorators/roles.decorators';
 
 @ApiTags('Products')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -40,6 +43,7 @@ export class ProductsController {
   }
 
   @Post()
+  @Roles(Role.Admin, Role.Owner, Role.Cashier)
   @ApiResponse({ status: 201, type: Product })
   @ApiResponse({ status: 400, description: 'Bad request' })
   createProduct(@Body() product: CreateProductDto) {
@@ -47,6 +51,7 @@ export class ProductsController {
   }
 
   @Put(':id')
+  @Roles(Role.Admin, Role.Owner, Role.Cashier)
   @ApiResponse({ status: 200, type: Product })
   @ApiResponse({ status: 404, description: 'Product not found' })
   updateProduct(@Param('id') id: number, @Body() product: UpdateProductDto) {
@@ -54,6 +59,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @Roles(Role.Admin, Role.Owner)
   @ApiResponse({
     status: 200,
     type: Object,
