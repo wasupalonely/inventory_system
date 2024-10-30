@@ -42,7 +42,9 @@ export class Product {
   @ManyToOne(() => Category, (category) => category.products)
   category: Category;
 
-  @ManyToOne(() => Supermarket, (supermarket) => supermarket.products)
+  @ManyToOne(() => Supermarket, (supermarket) => supermarket.products, {
+    onDelete: 'CASCADE',
+  })
   supermarket: Supermarket;
 
   @OneToMany(() => Inventory, (inventory) => inventory.product)
