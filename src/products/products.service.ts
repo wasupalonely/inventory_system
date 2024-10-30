@@ -72,7 +72,6 @@ export class ProductsService {
   }
 
   async update(id: number, product: UpdateProductDto): Promise<Product> {
-    // Verifica si el producto existe
     const existingProduct = await this.productRepo.findOne({
       where: { id },
       relations: ['category', 'supermarket'],
@@ -82,22 +81,31 @@ export class ProductsService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
+    const updateData = { ...product };
+    delete updateData.categoryId;
+
     if (product.categoryId) {
       const category =
         await this.categoryService.getCategoryByIdAndSupermarketId(
           product.categoryId,
           existingProduct.supermarket.id,
         );
+
       if (!category) {
         throw new NotFoundException(
           `Category with ID ${product.categoryId} not found for supermarket ${existingProduct.supermarket.id}`,
         );
       }
-      existingProduct.category = category;
+
+      await this.productRepo
+        .createQueryBuilder()
+        .relation(Product, 'category')
+        .of(id)
+        .set(category.id);
     }
 
     await this.productRepo.update(id, {
-      ...product,
+      ...updateData,
       supermarket: existingProduct.supermarket,
     });
 
