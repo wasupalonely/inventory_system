@@ -92,4 +92,11 @@ export class UserController {
   ): Promise<boolean> {
     return await this.userService.comparePasswordByUserId(id, payload.password);
   }
+
+  @ApiResponse({ status: 200, type: User })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
+  @Put('update-password/:id')
+  async updateUserPassword(id: number, password: string): Promise<User> {
+    return await this.userService.updatePassword(id, password);
+  }
 }
