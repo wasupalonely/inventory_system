@@ -10,7 +10,9 @@ export class SaleItem {
   @ManyToOne(() => Sale, (sale) => sale.saleItems)
   sale: Sale;
 
-  @ManyToOne(() => Product, (product) => product.saleItems)
+  @ManyToOne(() => Product, (product) => product.saleItems, {
+    onDelete: 'CASCADE',
+  })
   product: Product;
 
   @Column({ type: 'int' })

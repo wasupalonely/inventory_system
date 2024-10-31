@@ -13,7 +13,9 @@ export class Inventory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Product, (product) => product.inventory)
+  @ManyToOne(() => Product, (product) => product.inventory, {
+    onDelete: 'CASCADE',
+  })
   product: Product;
 
   @ManyToOne(() => Supermarket, (supermarket) => supermarket.inventory)

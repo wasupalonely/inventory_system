@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/swagger';
+import { OmitType, PartialType } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
 
 export class CreateInventoryDto {
@@ -17,4 +17,9 @@ export class CreateInventoryDto {
   stock: number;
 }
 
-export class UpdateInventoryDto extends PartialType(CreateInventoryDto) {}
+export class UpdateInventoryDto extends PartialType(
+  OmitType(CreateInventoryDto, ['productId', 'supermarketId'] as const),
+  {
+    skipNullProperties: true,
+  },
+) {}
