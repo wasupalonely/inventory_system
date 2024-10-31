@@ -93,9 +93,4 @@ export class CreateUserDto {
   role: Role;
 }
 
-export class UpdateUserDto extends PartialType(
-  OmitType(CreateUserDto, ['password'] as const),
-  {
-    skipNullProperties: true,
-  },
-) {}
+export class UpdateUserDto extends PartialType(CreateUserDto) {}

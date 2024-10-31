@@ -98,7 +98,7 @@ export class InventoryService {
     });
 
     if (!inventory) {
-      throw new NotFoundException('Supermercado no encontrado');
+      throw new NotFoundException('Inventario no encontrado');
     }
 
     return inventory;

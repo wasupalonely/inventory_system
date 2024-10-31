@@ -55,7 +55,7 @@ export class InventoryController {
     type: [Inventory],
   })
   @ApiResponse({ status: 404, description: 'Supermercado no encontrado' })
-  async getInventoryBySupermarket(id: number): Promise<Inventory[]> {
+  async getInventoryBySupermarket(@Param('id') id: number): Promise<Inventory[]> {
     return this.inventoryService.getInventoryBySupermarket(id);
   }
 
