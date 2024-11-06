@@ -13,6 +13,7 @@ import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import { CreateSaleDto } from './dto/sale.dto';
 import * as PDFDocument from 'pdfkit';
 import { Response } from 'express';
+import { SupermarketService } from 'src/supermarket/supermarket.service';
 
 @Injectable()
 export class SalesService {
@@ -25,6 +26,7 @@ export class SalesService {
     private productRepository: Repository<Product>,
     @InjectRepository(Inventory)
     private inventoryRepository: Repository<Inventory>,
+    private supermarketService: SupermarketService,
   ) {}
 
   async createSale(createSaleDto: CreateSaleDto) {
@@ -121,8 +123,20 @@ export class SalesService {
   }
 
   async getSalesBySupermarket(supermarketId: number) {
-    return this.saleRepository.find({
+    const supermarket =
+      await this.supermarketService.getSupermarket(supermarketId);
+
+    if (!supermarket) {
+      throw new NotFoundException(
+        `Supermercado con ID ${supermarketId} no encontrado`,
+      );
+    }
+
+    const sales = await this.saleRepository.find({
       where: { supermarket: { id: supermarketId } },
+      relations: ['saleItems', 'saleItems.product', 'user', 'supermarket'],
     });
+
+    return sales;
   }
 }

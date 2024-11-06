@@ -1,10 +1,12 @@
+import { Label } from 'src/shared/types/prediction';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('predictions')
@@ -13,18 +15,23 @@ export class Prediction {
   id: number;
 
   @ManyToOne(() => Supermarket)
-  @JoinColumn({ name: 'supermarket_id' })
   supermarket: Supermarket;
 
-  @Column('double')
+  @Column()
+  result: Label;
+
+  @Column({ type: 'float' })
   fresh: number;
 
-  @Column('double')
+  @Column({ type: 'float' })
   halfFresh: number;
 
-  @Column('double')
-  soiled: number;
+  @Column({ type: 'float' })
+  spoiled: number;
 
-  @Column('timestamp')
-  fecha: Date;
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

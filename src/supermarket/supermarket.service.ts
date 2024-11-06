@@ -21,6 +21,9 @@ import { Address } from './entities/address.entity';
 import * as moment from 'moment';
 import { importDynamic } from 'src/shared/utils';
 import { ScheduleFrequency } from 'src/shared/enums/schedule-frequency';
+import { PredictionResponse } from 'src/shared/types/prediction';
+import { CreatePredictionDto } from 'src/predictions/dto/prediction.dto';
+import { PredictionsService } from 'src/predictions/predictions.service';
 // import * as fs from 'fs';
 // import * as path from 'path';
 
@@ -43,6 +46,7 @@ export class SupermarketService implements OnModuleInit {
     private readonly schedulerRegistry: SchedulerRegistry,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    private readonly predictionsService: PredictionsService,
   ) {}
 
   async onModuleInit() {
@@ -162,7 +166,6 @@ export class SupermarketService implements OnModuleInit {
   async startCronJob(supermarketId: number) {
     const { handle_file } = await importDynamic('@gradio/client');
     const supermarket = await this.getSupermarket(supermarketId);
-
     const cronExpression = this.getCronExpression(
       supermarket.scheduleFrequency,
       supermarket.startTime,
@@ -172,39 +175,45 @@ export class SupermarketService implements OnModuleInit {
       console.log(
         `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
       );
-      if (supermarket.scheduleFrequency === ScheduleFrequency.EVERY_MINUTE) {
-        const executions = this.testModeExecutions.get(supermarketId) || 0;
-        if (executions >= this.TEST_MODE_LIMIT) {
-          console.log(
-            `Test mode limit reached for supermarket ${supermarketId}. Changing to daily schedule.`,
-          );
-          await this.updateCronStatus(
-            supermarketId,
-            true,
-            ScheduleFrequency.DAILY,
-          );
-          return;
-        }
-        this.testModeExecutions.set(supermarketId, executions + 1);
+
+      if (
+        supermarket.scheduleFrequency === ScheduleFrequency.EVERY_MINUTE &&
+        this.checkTestModeLimit(supermarketId)
+      ) {
+        console.log('entraaa');
+        return;
       }
 
       try {
-        const randomImageUrl =
-          this.meatImages[Math.floor(Math.random() * this.meatImages.length)];
+        const randomImageUrl = this.getRandomImageUrl();
+        const predictionData = await this.fetchPrediction(
+          randomImageUrl,
+          handle_file,
+        );
 
-        console.log(`Usando imagen: ${randomImageUrl}`);
+        console.log('PREDICTION ---->', predictionData[0]);
+        const predictionToSave: PredictionResponse = predictionData[0];
 
-        const response = await fetch(randomImageUrl);
-        const imageBlob = await response.blob();
+        const predictionParsed: CreatePredictionDto = {
+          supermarketId,
+          result: predictionToSave.label,
+          fresh: predictionToSave.confidences.find(
+            (confidence) => confidence.label === 'Fresh',
+          ).confidence,
+          halfFresh: predictionToSave.confidences.find(
+            (confidence) => confidence.label === 'Half-fresh',
+          ).confidence,
+          spoiled: predictionToSave.confidences.find(
+            (confidence) => confidence.label === 'Spoiled',
+          ).confidence,
+        };
+        console.log(
+          '🚀 ~ SupermarketService ~ job ~ predictionParsed:',
+          predictionParsed,
+        );
 
-        const prediction = await this.app.predict('/predict', [
-          handle_file(imageBlob),
-        ]);
-
-        console.log('PREDICTION ---->', prediction.data);
-
-        // Aquí puedes agregar la lógica para manejar la predicción
-        // Por ejemplo, guardar en la base de datos, enviar notificaciones, etc.
+        await this.predictionsService.create(predictionParsed);
+        // Aquí puedes agregar lógica adicional para manejar la predicción
       } catch (error) {
         console.error('Error al hacer la predicción:', error);
       }
@@ -212,6 +221,40 @@ export class SupermarketService implements OnModuleInit {
 
     this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);
     job.start();
+  }
+
+  // private validatePredictionResponse(predictionData: any): boolean {
+
+  // }
+
+  private checkTestModeLimit(supermarketId: number): boolean {
+    const executions = this.testModeExecutions.get(supermarketId) || 0;
+    if (executions >= this.TEST_MODE_LIMIT) {
+      console.log(
+        `Test mode limit reached for supermarket ${supermarketId}. Changing to daily schedule.`,
+      );
+      this.updateCronStatus(supermarketId, true, ScheduleFrequency.DAILY);
+      return true;
+    }
+    this.testModeExecutions.set(supermarketId, executions + 1);
+    return false;
+  }
+
+  private getRandomImageUrl(): string {
+    return this.meatImages[Math.floor(Math.random() * this.meatImages.length)];
+  }
+
+  private async fetchPrediction(imageUrl: string, handle_file: any) {
+    console.log(
+      '🚀 ~ SupermarketService ~ fetchPrediction ~ imageUrl:',
+      imageUrl,
+    );
+    const response = await fetch(imageUrl);
+    const imageBlob = await response.blob();
+    const prediction = await this.app.predict('/predict', [
+      handle_file(imageBlob),
+    ]);
+    return prediction.data;
   }
 
   private async stopCronJob(supermarketId: number) {

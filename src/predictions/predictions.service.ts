@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import { Repository } from 'typeorm';
-import { Prediction } from './entities/prediction.entity/prediction.entity';
+import { Prediction } from './entities/prediction.entity';
 import { CreatePredictionDto, UpdatePredictionDto } from './dto/prediction.dto';
 
 @Injectable()
@@ -15,14 +15,19 @@ export class PredictionsService {
     private supermarketRepository: Repository<Supermarket>,
   ) {}
 
-  // Método para crear una predicción
+  async getPredictionsBySupermarket(id: number): Promise<Prediction[]> {
+    return this.predictionRepository.find({
+      where: { supermarket: { id } },
+    });
+  }
+
   async create(createPredictionDto: CreatePredictionDto): Promise<Prediction> {
     const supermarket = await this.supermarketRepository.findOne({
       where: { id: createPredictionDto.supermarketId },
     });
 
     if (!supermarket) {
-      throw new NotFoundException('Supermarket not found');
+      throw new NotFoundException('Supermercado no encontrado');
     }
 
     const newPrediction = this.predictionRepository.create({
@@ -33,7 +38,6 @@ export class PredictionsService {
     return this.predictionRepository.save(newPrediction);
   }
 
-  // Método para actualizar una predicción
   async update(
     id: number,
     updatePredictionDto: UpdatePredictionDto,

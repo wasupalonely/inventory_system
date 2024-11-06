@@ -80,7 +80,7 @@ export class CreateSupermarketDto {
   @IsObject()
   address: CreateAddressDto;
 
-  @ApiProperty({ example: 'DAILY', default: 'DAILY' })
+  @ApiProperty({ example: 'DAILY', default: 'EVERY_MINUTE' })
   @IsEnum(ScheduleFrequency, { message: 'Frecuencia no válida' })
   @IsOptional()
   scheduleFrequency: ScheduleFrequency;

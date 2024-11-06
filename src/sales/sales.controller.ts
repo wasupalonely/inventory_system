@@ -1,4 +1,12 @@
-import { Controller, Post, Body, UseGuards, Param, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Param,
+  Res,
+  Get,
+} from '@nestjs/common';
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/sale.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -31,5 +39,13 @@ export class SalesController {
     @Res() response: Response,
   ) {
     return this.salesService.generateInvoicePDF(saleId, response);
+  }
+
+  @Roles(Role.Admin, Role.Cashier, Role.Owner, Role.Viewer)
+  @Get(':supermarketId')
+  @ApiResponse({ status: 200, description: 'Sales retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Supermarket not found' })
+  async getAllSales(@Param('supermarketId') supermarketId: number) {
+    return this.salesService.getSalesBySupermarket(supermarketId);
   }
 }
