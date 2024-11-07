@@ -84,39 +84,79 @@ export class SalesService {
       where: { id: saleId },
       relations: ['saleItems', 'saleItems.product', 'user', 'supermarket'],
     });
-
+  
     if (!sale) {
       throw new NotFoundException(`Venta con ID ${saleId} no encontrada`);
     }
-
+  
     const doc = new PDFDocument({ margin: 50 });
     response.setHeader('Content-Type', 'application/pdf');
     response.setHeader(
       'Content-Disposition',
       `attachment; filename=factura_${saleId}.pdf`,
     );
-
+  
     doc.pipe(response);
-
-    doc.fontSize(20).text(`Factura de Venta #${saleId}`, { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).text(`Supermercado: ${sale.supermarket.name}`);
-    doc.text(`Fecha: ${sale.date}`);
-    doc.text(`Cliente: ${sale.user.getFullName()}`);
-    doc.text(`Total: $${sale.totalPrice}`);
-    doc.moveDown(2);
-
-    doc.fontSize(16).text('Detalles de los Productos:');
+  
+    // Título de la factura (encabezado)
+    doc.fontSize(20).font('Courier-Bold').text(`Factura de Venta #${saleId}`, { align: 'center' });
+    doc.moveDown(1);
+  
+    // Detalles de la tienda y cliente
+    doc.fontSize(12).font('Courier-Bold').text(`Supermercado:`, { align: 'left' });
+    doc.fontSize(14).font('Courier').text(sale.supermarket.name, { align: 'left' });
+    doc.moveDown(0.5);
+    
+    doc.fontSize(12).font('Courier-Bold').text(`Fecha:`, { align: 'left' });
+    doc.fontSize(14).font('Courier').text(sale.date.toLocaleString(), { align: 'left' });
+    doc.moveDown(0.5);
+  
+    doc.fontSize(12).font('Courier-Bold').text(`Vendedor:`, { align: 'left' });
+    doc.fontSize(14).font('Courier').text(sale.user.getFullName(), { align: 'left' });
+    doc.moveDown(0.5);
+  
+    doc.fontSize(12).font('Courier-Bold').text(`Total:`, { align: 'left' });
+    doc.fontSize(14).font('Courier').text(`$${sale.totalPrice.toFixed(2)}`, { align: 'left' });
+  
+    // Línea de separación
+    doc.moveDown(1);
+    doc.lineWidth(0.5).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveDown(1);
+  
+    // Tabla de detalles de los productos
+    doc.fontSize(16).font('Courier-Bold').text('Detalles de la Venta', { align: 'left' });
+    doc.moveDown(0.5);
+  
+    // Encabezados de la tabla
+    doc.fontSize(12).font('Courier-Bold').text(
+      `#   Producto             Cantidad   Precio Unitario      Subtotal`, 
+      { width: 500, align: 'left' }
+    );
+    doc.moveDown(0.5);
+  
+    // Líneas de los productos
+    let yPos = doc.y;
     sale.saleItems.forEach((item, index) => {
-      doc
-        .fontSize(12)
-        .text(
-          `${index + 1}. ${item.product.name} - ${item.quantity} unidades - $${item.product.price} c/u`,
-        );
+      doc.fontSize(12).font('Courier').text(
+        `${index + 1}   ${item.product.name}           ${item.quantity}         $${item.product.price.toFixed(2)}         $${(item.product.price * item.quantity).toFixed(2)}`,
+        { width: 500, align: 'left' }
+      );
+      yPos = doc.y;
     });
-
+  
+    // Línea de separación final
+    doc.moveDown(1);
+    doc.lineWidth(0.5).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+  
+    // Firma o notas adicionales (si es necesario)
+    doc.moveDown(1);
+    doc.fontSize(12).font('Courier').text('Gracias por su compra. Si tiene alguna consulta, no dude en contactarnos.', { align: 'center' });
+  
+    // Finalizar el documento
     doc.end();
   }
+  
+
 
   async getSales() {
     return this.saleRepository.find();
