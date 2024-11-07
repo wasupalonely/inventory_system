@@ -129,7 +129,7 @@ export class SalesService {
   
     // Encabezados de la tabla
     doc.fontSize(12).font('Courier-Bold').text(
-      `#   Producto             Cantidad   Precio Unitario     Subtotal`, 
+      `#   Producto             Cantidad   Precio Unitario      Subtotal`, 
       { width: 500, align: 'left' }
     );
     doc.moveDown(0.5);
