@@ -65,6 +65,13 @@ export class User {
   phoneNumber: string;
 
   @ApiProperty({
+    example: 'https://example.com/image.png',
+    description: 'User profile image',
+  })
+  @Column({ nullable: true })
+  profileImage?: string;
+
+  @ApiProperty({
     example: 'Password123@',
     description: 'User password',
   })

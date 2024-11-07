@@ -16,14 +16,22 @@ export class UploadService {
 
   async uploadImage(filePath: string, folderPath: string): Promise<string> {
     try {
+      if (!folderPath) {
+        throw new Error(
+          'folderPath debe especificarse (e.g., "products" o "user").',
+        );
+      }
+
       const result = await cloudinary.uploader.upload(filePath, {
         folder: folderPath,
       });
 
-      fs.unlinkSync(filePath);
+      // Eliminar archivo local de forma asíncrona después de la subida exitosa
+      await fs.promises.unlink(filePath);
 
       return result.secure_url;
     } catch (error) {
+      console.error('Error al subir la imagen a Cloudinary:', error.message);
       throw new Error(`Error al subir la imagen: ${error.message}`);
     }
   }

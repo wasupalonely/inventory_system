@@ -4,11 +4,13 @@ import { User } from './entities/user.entity';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { SupermarketModule } from 'src/supermarket/supermarket.module';
+import { UploadModule } from 'src/upload/upload.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     forwardRef(() => SupermarketModule),
+    UploadModule,
   ],
   controllers: [UserController],
   providers: [UserService],

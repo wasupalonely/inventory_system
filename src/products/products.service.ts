@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { SupermarketService } from 'src/supermarket/supermarket.service';
 import { CategoriesService } from 'src/categories/categories.service';
+import { UploadService } from 'src/upload/upload.service';
 
 @Injectable()
 export class ProductsService {
@@ -12,6 +13,7 @@ export class ProductsService {
     @InjectRepository(Product) private productRepo: Repository<Product>,
     private readonly supermarketService: SupermarketService,
     private readonly categoryService: CategoriesService,
+    private readonly uploadService: UploadService,
   ) {}
 
   async findAll(): Promise<Product[]> {
@@ -40,7 +42,10 @@ export class ProductsService {
     return await this.productRepo.findOne({ where: { id } });
   }
 
-  async create(product: CreateProductDto): Promise<Product> {
+  async create(
+    product: CreateProductDto,
+    image: Express.Multer.File,
+  ): Promise<Product> {
     const category = await this.categoryService.getCategoryByIdAndSupermarketId(
       product.categoryId,
       product.supermarketId,
@@ -62,8 +67,15 @@ export class ProductsService {
       );
     }
 
+    let imageUrl = null;
+    console.log('path', image.path);
+    if (image) {
+      imageUrl = await this.uploadService.uploadImage(image.path, 'products');
+    }
+
     const newProduct = this.productRepo.create({
       ...product,
+      image: imageUrl,
       category,
       supermarket,
     });
@@ -71,7 +83,11 @@ export class ProductsService {
     return await this.productRepo.save(newProduct);
   }
 
-  async update(id: number, product: UpdateProductDto): Promise<Product> {
+  async update(
+    id: number,
+    product: UpdateProductDto,
+    imageFile?: Express.Multer.File,
+  ): Promise<Product> {
     const existingProduct = await this.productRepo.findOne({
       where: { id },
       relations: ['category', 'supermarket'],
@@ -81,7 +97,15 @@ export class ProductsService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    const updateData = { ...product };
+    let imageUrl = existingProduct.image;
+    if (imageFile) {
+      imageUrl = await this.uploadService.uploadImage(
+        imageFile.path,
+        'products',
+      );
+    }
+
+    const updateData = { ...product, image: imageUrl };
     delete updateData.categoryId;
 
     if (product.categoryId) {
