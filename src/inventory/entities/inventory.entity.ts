@@ -18,7 +18,9 @@ export class Inventory {
   })
   product: Product;
 
-  @ManyToOne(() => Supermarket, (supermarket) => supermarket.inventory)
+  @ManyToOne(() => Supermarket, (supermarket) => supermarket.inventory, {
+    onDelete: 'CASCADE',
+  })
   supermarket: Supermarket;
 
   @ApiProperty({

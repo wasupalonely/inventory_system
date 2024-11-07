@@ -6,7 +6,9 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
@@ -16,6 +18,7 @@ import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { Role } from 'src/shared/enums/roles.enum';
 import { Roles } from 'src/shared/decorators/roles.decorators';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Products')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,19 +46,29 @@ export class ProductsController {
   }
 
   @Post()
+  @UseInterceptors(FileInterceptor('image', { dest: '../uploads' }))
   @Roles(Role.Admin, Role.Owner, Role.Cashier)
   @ApiResponse({ status: 201, type: Product })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  createProduct(@Body() product: CreateProductDto) {
-    return this.productsService.create(product);
+  createProduct(
+    @Body() product: CreateProductDto,
+    @UploadedFile() image: Express.Multer.File,
+  ) {
+    console.log('IMAGE ---->', image);
+    return this.productsService.create(product, image);
   }
 
   @Put(':id')
+  @UseInterceptors(FileInterceptor('image'))
   @Roles(Role.Admin, Role.Owner, Role.Cashier)
   @ApiResponse({ status: 200, type: Product })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  updateProduct(@Param('id') id: number, @Body() product: UpdateProductDto) {
-    return this.productsService.update(id, product);
+  updateProduct(
+    @Param('id') id: number,
+    @Body() product: UpdateProductDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return this.productsService.update(id, product, image);
   }
 
   @Delete(':id')

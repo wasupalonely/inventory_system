@@ -54,7 +54,7 @@ export class AuthService {
     };
 
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '1d' }),
+      access_token: this.jwtService.sign(payload, { expiresIn: '30d' }),
       user: userValidation,
     };
   }

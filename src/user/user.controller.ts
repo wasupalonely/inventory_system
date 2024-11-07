@@ -4,9 +4,12 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/user.dto';
@@ -17,6 +20,7 @@ import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { AddUserToSupermarketDto } from './dto/no-admin-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('User')
 @Controller('users')
@@ -98,5 +102,14 @@ export class UserController {
   @Put('update-password/:id')
   async updateUserPassword(id: number, password: string): Promise<User> {
     return await this.userService.updatePassword(id, password);
+  }
+
+  @Patch(':id/profile-image')
+  @UseInterceptors(FileInterceptor('image', { dest: '../uploads' }))
+  async updateProfileImage(
+    @Param('id') id: number,
+    @UploadedFile() image: Express.Multer.File,
+  ) {
+    return await this.userService.updateProfileImage(id, image);
   }
 }

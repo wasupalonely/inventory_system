@@ -1,5 +1,6 @@
 import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateProductDto {
   @ApiProperty({
@@ -22,6 +23,10 @@ export class CreateProductDto {
     example: 1600,
     required: true,
   })
+  @Transform(({ value }) => {
+    if (value === '') return undefined;
+    return Number(value);
+  })
   @IsNumber()
   @IsNotEmpty()
   price: number;
@@ -30,6 +35,10 @@ export class CreateProductDto {
     example: 10,
     required: true,
     description: 'The id of the category associated to the product',
+  })
+  @Transform(({ value }) => {
+    if (value === '') return undefined;
+    return Number(value);
   })
   @IsNumber()
   @IsNotEmpty()
@@ -40,6 +49,10 @@ export class CreateProductDto {
     required: true,
     description: 'The id of the supermarket associated to the product',
   })
+  @Transform(({ value }) => {
+    if (value === '') return undefined;
+    return Number(value);
+  })
   @IsNumber()
   @IsNotEmpty()
   supermarketId: number;
@@ -47,7 +60,5 @@ export class CreateProductDto {
 
 export class UpdateProductDto extends PartialType(
   OmitType(CreateProductDto, ['supermarketId'] as const),
-  {
-    skipNullProperties: true,
-  },
+  { skipNullProperties: true },
 ) {}

@@ -33,6 +33,13 @@ export class Product {
   description: string;
 
   @ApiProperty({
+    example: 'https://example.com/image.png',
+    description: 'Product image',
+  })
+  @Column({ nullable: true })
+  image: string;
+
+  @ApiProperty({
     example: 1500,
     description: 'The price of the product',
   })

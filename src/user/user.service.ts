@@ -16,6 +16,7 @@ import {
   UpdateUserNoAdminDto,
 } from './dto/no-admin-user.dto';
 import { Role } from 'src/shared/enums/roles.enum';
+import { UploadService } from 'src/upload/upload.service';
 
 @Injectable()
 export class UserService {
@@ -23,6 +24,7 @@ export class UserService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @Inject(forwardRef(() => SupermarketService))
     private readonly supermarketService: SupermarketService,
+    private readonly uploadService: UploadService,
   ) {}
 
   async getUsers(): Promise<User[]> {
@@ -197,5 +199,25 @@ export class UserService {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
     }
     return bcrypt.compareSync(password, user.password);
+  }
+
+  async updateProfileImage(
+    userId: number,
+    imageFile: Express.Multer.File,
+  ): Promise<User> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    const imageUrl = await this.uploadService.uploadImage(
+      imageFile.path,
+      'user',
+    );
+
+    user.profileImage = imageUrl;
+    await this.userRepo.save(user);
+
+    return user;
   }
 }
