@@ -84,7 +84,7 @@ export class SupermarketController {
     await this.supermarketService.updateCronStatus(
       supermarketId,
       true,
-      ScheduleFrequency.DAILY,
+      ScheduleFrequency.EVERY_MINUTE,
     );
     return { message: 'Cronjob habilitado' };
   }

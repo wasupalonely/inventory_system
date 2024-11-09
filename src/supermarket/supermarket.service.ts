@@ -24,6 +24,8 @@ import { ScheduleFrequency } from 'src/shared/enums/schedule-frequency';
 import { PredictionResponse } from 'src/shared/types/prediction';
 import { CreatePredictionDto } from 'src/predictions/dto/prediction.dto';
 import { PredictionsService } from 'src/predictions/predictions.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { CreateNotificationDto } from 'src/notifications/dto/notification.dto';
 // import * as fs from 'fs';
 // import * as path from 'path';
 
@@ -47,6 +49,7 @@ export class SupermarketService implements OnModuleInit {
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private readonly predictionsService: PredictionsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async onModuleInit() {
@@ -55,7 +58,7 @@ export class SupermarketService implements OnModuleInit {
     const supermarkets = await this.findAllWithCronEnabled();
 
     supermarkets.forEach((supermarket) => {
-      this.startCronJob(supermarket.id);
+      this.startOrUpdateCronJob(supermarket.id);
     });
   }
 
@@ -92,10 +95,111 @@ export class SupermarketService implements OnModuleInit {
       scheduleFrequency,
       startTime: new Date(),
     });
+
     if (cronjobEnabled) {
-      this.startCronJob(supermarketId);
+      this.startOrUpdateCronJob(supermarketId);
     } else {
-      this.stopCronJob(supermarketId);
+      this.stopCronJobIfExists(supermarketId);
+    }
+  }
+
+  async startOrUpdateCronJob(supermarketId: number) {
+    const supermarket = await this.getSupermarket(supermarketId);
+
+    const cronExpression = this.getCronExpression(
+      supermarket.scheduleFrequency,
+      supermarket.startTime,
+    );
+
+    this.stopCronJobIfExists(supermarketId);
+
+    const job = new CronJob(cronExpression, async () => {
+      console.log(
+        `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
+      );
+
+      if (
+        supermarket.scheduleFrequency === ScheduleFrequency.EVERY_MINUTE &&
+        this.checkTestModeLimit(supermarketId)
+      ) {
+        console.log(
+          `Límite de modo de prueba alcanzado para supermercado ${supermarketId}. Cambiando a DAILY.`,
+        );
+        await this.updateCronStatus(
+          supermarketId,
+          true,
+          ScheduleFrequency.DAILY,
+        );
+        return;
+      }
+
+      try {
+        const randomImageUrl = this.getRandomImageUrl();
+        const predictionData = await this.fetchPrediction(randomImageUrl);
+
+        const predictionToSave: PredictionResponse = predictionData[0];
+        const predictionParsed: CreatePredictionDto = {
+          image: randomImageUrl,
+          supermarketId,
+          result: predictionToSave.label,
+          fresh: predictionToSave.confidences.find(
+            (confidence) => confidence.label === 'Fresh',
+          ).confidence,
+          halfFresh: predictionToSave.confidences.find(
+            (confidence) => confidence.label === 'Half-fresh',
+          ).confidence,
+          spoiled: predictionToSave.confidences.find(
+            (confidence) => confidence.label === 'Spoiled',
+          ).confidence,
+        };
+
+        const prediction =
+          await this.predictionsService.create(predictionParsed);
+
+        if (
+          prediction.result === 'Spoiled' ||
+          prediction.result === 'Half-fresh'
+        ) {
+          const notification: CreateNotificationDto = {
+            supermarketId,
+            title: 'Alerta de frescura en tu carne',
+            message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}, ¡Revisa tus existencias!`,
+          };
+
+          const mailToSend: {
+            to: string;
+            subject: string;
+            text?: string;
+            html?: string;
+          } = {
+            subject: 'Alerta de frescura en tu carne',
+            to: supermarket.owner.email,
+            // text: `Notamos algo extraño en tu sección de existencias de carne el dia ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}, ¡Revisa tus existencias!`,
+            html: `<h1>Hola! ${supermarket.owner.firstName}</h1>
+      <p>Notamos que en tu sección de carnes hay algo extraño el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}. Por favor, revisa el estado de las existencias y toma las medidas necesarias.</p>
+      `,
+          };
+          await this.notificationsService.createNotification(
+            notification,
+            mailToSend,
+          );
+        }
+      } catch (error) {
+        console.error('Error al hacer la predicción:', error);
+      }
+    });
+
+    this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);
+    job.start();
+  }
+
+  private stopCronJobIfExists(supermarketId: number) {
+    const jobName = `supermarketCron-${supermarketId}`;
+    if (this.schedulerRegistry.doesExist('cron', jobName)) {
+      const existingJob = this.schedulerRegistry.getCronJob(jobName);
+      existingJob.stop();
+      this.schedulerRegistry.deleteCronJob(jobName);
+      console.log(`Cronjob ${jobName} detenido y eliminado.`);
     }
   }
 
@@ -163,65 +267,65 @@ export class SupermarketService implements OnModuleInit {
     }
   }
 
-  async startCronJob(supermarketId: number) {
-    const { handle_file } = await importDynamic('@gradio/client');
-    const supermarket = await this.getSupermarket(supermarketId);
-    const cronExpression = this.getCronExpression(
-      supermarket.scheduleFrequency,
-      supermarket.startTime,
-    );
+  // async startCronJob(supermarketId: number) {
+  //   const { handle_file } = await importDynamic('@gradio/client');
+  //   const supermarket = await this.getSupermarket(supermarketId);
+  //   const cronExpression = this.getCronExpression(
+  //     supermarket.scheduleFrequency,
+  //     supermarket.startTime,
+  //   );
 
-    const job = new CronJob(cronExpression, async () => {
-      console.log(
-        `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
-      );
+  //   const job = new CronJob(cronExpression, async () => {
+  //     console.log(
+  //       `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
+  //     );
 
-      if (
-        supermarket.scheduleFrequency === ScheduleFrequency.EVERY_MINUTE &&
-        this.checkTestModeLimit(supermarketId)
-      ) {
-        console.log('entraaa');
-        return;
-      }
+  //     if (
+  //       supermarket.scheduleFrequency === ScheduleFrequency.EVERY_MINUTE &&
+  //       this.checkTestModeLimit(supermarketId)
+  //     ) {
+  //       console.log('entraaa');
+  //       return;
+  //     }
 
-      try {
-        const randomImageUrl = this.getRandomImageUrl();
-        const predictionData = await this.fetchPrediction(
-          randomImageUrl,
-          handle_file,
-        );
+  //     try {
+  //       const randomImageUrl = this.getRandomImageUrl();
+  //       const predictionData = await this.fetchPrediction(
+  //         randomImageUrl,
+  //         handle_file,
+  //       );
 
-        console.log('PREDICTION ---->', predictionData[0]);
-        const predictionToSave: PredictionResponse = predictionData[0];
+  //       console.log('PREDICTION ---->', predictionData[0]);
+  //       const predictionToSave: PredictionResponse = predictionData[0];
 
-        const predictionParsed: CreatePredictionDto = {
-          supermarketId,
-          result: predictionToSave.label,
-          fresh: predictionToSave.confidences.find(
-            (confidence) => confidence.label === 'Fresh',
-          ).confidence,
-          halfFresh: predictionToSave.confidences.find(
-            (confidence) => confidence.label === 'Half-fresh',
-          ).confidence,
-          spoiled: predictionToSave.confidences.find(
-            (confidence) => confidence.label === 'Spoiled',
-          ).confidence,
-        };
-        console.log(
-          '🚀 ~ SupermarketService ~ job ~ predictionParsed:',
-          predictionParsed,
-        );
+  //       const predictionParsed: CreatePredictionDto = {
+  //         supermarketId,
+  //         result: predictionToSave.label,
+  //         fresh: predictionToSave.confidences.find(
+  //           (confidence) => confidence.label === 'Fresh',
+  //         ).confidence,
+  //         halfFresh: predictionToSave.confidences.find(
+  //           (confidence) => confidence.label === 'Half-fresh',
+  //         ).confidence,
+  //         spoiled: predictionToSave.confidences.find(
+  //           (confidence) => confidence.label === 'Spoiled',
+  //         ).confidence,
+  //       };
+  //       console.log(
+  //         '🚀 ~ SupermarketService ~ job ~ predictionParsed:',
+  //         predictionParsed,
+  //       );
 
-        await this.predictionsService.create(predictionParsed);
-        // Aquí puedes agregar lógica adicional para manejar la predicción
-      } catch (error) {
-        console.error('Error al hacer la predicción:', error);
-      }
-    });
+  //       await this.predictionsService.create(predictionParsed);
+  //       // Aquí puedes agregar lógica adicional para manejar la predicción
+  //     } catch (error) {
+  //       console.error('Error al hacer la predicción:', error);
+  //     }
+  //   });
 
-    this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);
-    job.start();
-  }
+  //   this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);
+  //   job.start();
+  // }
 
   // private validatePredictionResponse(predictionData: any): boolean {
 
@@ -230,9 +334,7 @@ export class SupermarketService implements OnModuleInit {
   private checkTestModeLimit(supermarketId: number): boolean {
     const executions = this.testModeExecutions.get(supermarketId) || 0;
     if (executions >= this.TEST_MODE_LIMIT) {
-      console.log(
-        `Test mode limit reached for supermarket ${supermarketId}. Changing to daily schedule.`,
-      );
+      // Actualiza la frecuencia a DAILY y reinicia el cronjob con la nueva frecuencia
       this.updateCronStatus(supermarketId, true, ScheduleFrequency.DAILY);
       return true;
     }
@@ -240,21 +342,18 @@ export class SupermarketService implements OnModuleInit {
     return false;
   }
 
-  private getRandomImageUrl(): string {
-    return this.meatImages[Math.floor(Math.random() * this.meatImages.length)];
-  }
-
-  private async fetchPrediction(imageUrl: string, handle_file: any) {
-    console.log(
-      '🚀 ~ SupermarketService ~ fetchPrediction ~ imageUrl:',
-      imageUrl,
-    );
+  private async fetchPrediction(imageUrl: string) {
+    const { handle_file } = await importDynamic('@gradio/client');
     const response = await fetch(imageUrl);
     const imageBlob = await response.blob();
     const prediction = await this.app.predict('/predict', [
       handle_file(imageBlob),
     ]);
     return prediction.data;
+  }
+
+  private getRandomImageUrl(): string {
+    return this.meatImages[Math.floor(Math.random() * this.meatImages.length)];
   }
 
   private async stopCronJob(supermarketId: number) {
