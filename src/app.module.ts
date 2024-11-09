@@ -18,6 +18,7 @@ import { CloudinaryConfig } from './config/cloudinary.config';
 // import { APP_GUARD } from '@nestjs/core';
 import { UploadModule } from './upload/upload.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     ReportsModule,
     UploadModule,
     CloudinaryModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
