@@ -6,6 +6,7 @@ import {
   Param,
   Res,
   Get,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/sale.dto';
@@ -47,5 +48,16 @@ export class SalesController {
   @ApiResponse({ status: 404, description: 'Supermarket not found' })
   async getAllSales(@Param('supermarketId') supermarketId: number) {
     return this.salesService.getSalesBySupermarket(supermarketId);
+  }
+
+  @Get('chart-data/:supermarketId')
+  async getMonthlySalesDataBySupermarket(
+    @Param('supermarketId', ParseIntPipe) supermarketId: number,
+  ) {
+    const salesData = await this.salesService.getMonthlySalesDataBySupermarket(supermarketId);
+    return {
+      thisYear: salesData.thisYear,
+      lastYear: salesData.lastYear,
+    };
   }
 }

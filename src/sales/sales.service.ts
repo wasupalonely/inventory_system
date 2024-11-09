@@ -84,79 +84,110 @@ export class SalesService {
       where: { id: saleId },
       relations: ['saleItems', 'saleItems.product', 'user', 'supermarket'],
     });
-  
+
     if (!sale) {
       throw new NotFoundException(`Venta con ID ${saleId} no encontrada`);
     }
-  
+
     const doc = new PDFDocument({ margin: 50 });
     response.setHeader('Content-Type', 'application/pdf');
     response.setHeader(
       'Content-Disposition',
       `attachment; filename=factura_${saleId}.pdf`,
     );
-  
+
     doc.pipe(response);
-  
+
     // Título de la factura (encabezado)
-    doc.fontSize(20).font('Courier-Bold').text(`Factura de Venta #${saleId}`, { align: 'center' });
+    doc
+      .fontSize(20)
+      .font('Courier-Bold')
+      .text(`Factura de Venta #${saleId}`, { align: 'center' });
     doc.moveDown(1);
-  
+
     // Detalles de la tienda y cliente
-    doc.fontSize(12).font('Courier-Bold').text(`Supermercado:`, { align: 'left' });
-    doc.fontSize(14).font('Courier').text(sale.supermarket.name, { align: 'left' });
+    doc
+      .fontSize(12)
+      .font('Courier-Bold')
+      .text(`Supermercado:`, { align: 'left' });
+    doc
+      .fontSize(14)
+      .font('Courier')
+      .text(sale.supermarket.name, { align: 'left' });
     doc.moveDown(0.5);
-    
+
     doc.fontSize(12).font('Courier-Bold').text(`Fecha:`, { align: 'left' });
-    doc.fontSize(14).font('Courier').text(sale.date.toLocaleString(), { align: 'left' });
+    doc
+      .fontSize(14)
+      .font('Courier')
+      .text(sale.date.toLocaleString(), { align: 'left' });
     doc.moveDown(0.5);
-  
+
     doc.fontSize(12).font('Courier-Bold').text(`Vendedor:`, { align: 'left' });
-    doc.fontSize(14).font('Courier').text(sale.user.getFullName(), { align: 'left' });
+    doc
+      .fontSize(14)
+      .font('Courier')
+      .text(sale.user.getFullName(), { align: 'left' });
     doc.moveDown(0.5);
-  
+
     doc.fontSize(12).font('Courier-Bold').text(`Total:`, { align: 'left' });
-    doc.fontSize(14).font('Courier').text(`$${sale.totalPrice.toFixed(2)}`, { align: 'left' });
-  
+    doc
+      .fontSize(14)
+      .font('Courier')
+      .text(`$${sale.totalPrice.toFixed(2)}`, { align: 'left' });
+
     // Línea de separación
     doc.moveDown(1);
     doc.lineWidth(0.5).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     doc.moveDown(1);
-  
+
     // Tabla de detalles de los productos
-    doc.fontSize(16).font('Courier-Bold').text('Detalles de la Venta', { align: 'left' });
+    doc
+      .fontSize(16)
+      .font('Courier-Bold')
+      .text('Detalles de la Venta', { align: 'left' });
     doc.moveDown(0.5);
-  
+
     // Encabezados de la tabla
-    doc.fontSize(12).font('Courier-Bold').text(
-      `#   Producto             Cantidad   Precio Unitario      Subtotal`, 
-      { width: 500, align: 'left' }
-    );
+    doc
+      .fontSize(12)
+      .font('Courier-Bold')
+      .text(
+        `#   Producto             Cantidad   Precio Unitario      Subtotal`,
+        { width: 500, align: 'left' },
+      );
     doc.moveDown(0.5);
-  
+
     // Líneas de los productos
     let yPos = doc.y;
     sale.saleItems.forEach((item, index) => {
-      doc.fontSize(12).font('Courier').text(
-        `${index + 1}   ${item.product.name}           ${item.quantity}         $${item.product.price.toFixed(2)}         $${(item.product.price * item.quantity).toFixed(2)}`,
-        { width: 500, align: 'left' }
-      );
+      doc
+        .fontSize(12)
+        .font('Courier')
+        .text(
+          `${index + 1}   ${item.product.name}           ${item.quantity}         $${item.product.price.toFixed(2)}         $${(item.product.price * item.quantity).toFixed(2)}`,
+          { width: 500, align: 'left' },
+        );
       yPos = doc.y;
     });
-  
+
     // Línea de separación final
     doc.moveDown(1);
     doc.lineWidth(0.5).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-  
+
     // Firma o notas adicionales (si es necesario)
     doc.moveDown(1);
-    doc.fontSize(12).font('Courier').text('Gracias por su compra. Si tiene alguna consulta, no dude en contactarnos.', { align: 'center' });
-  
+    doc
+      .fontSize(12)
+      .font('Courier')
+      .text(
+        'Gracias por su compra. Si tiene alguna consulta, no dude en contactarnos.',
+        { align: 'center' },
+      );
+
     // Finalizar el documento
     doc.end();
   }
-  
-
 
   async getSales() {
     return this.saleRepository.find();
@@ -178,5 +209,40 @@ export class SalesService {
     });
 
     return sales;
+  }
+
+  async getMonthlySalesDataBySupermarket(supermarketId: number): Promise<{ thisYear: number[], lastYear: number[] }> {
+    const currentYear = new Date().getFullYear();
+    const lastYear = currentYear - 1;
+
+    const sales = await this.saleRepository
+      .createQueryBuilder('sale')
+      .select('EXTRACT(MONTH FROM sale.date)', 'month')
+      .addSelect('EXTRACT(YEAR FROM sale.date)', 'year')
+      .addSelect('SUM(sale.totalPrice)', 'total')
+      .where('sale.supermarketId = :supermarketId', { supermarketId })
+      .andWhere('EXTRACT(YEAR FROM sale.date) = :currentYear OR EXTRACT(YEAR FROM sale.date) = :lastYear', {
+        currentYear,
+        lastYear,
+      })
+      .groupBy('year')
+      .addGroupBy('month')
+      .orderBy('year', 'DESC')
+      .addOrderBy('month', 'ASC')
+      .getRawMany();
+
+    const thisYearData = Array(12).fill(0);
+    const lastYearData = Array(12).fill(0);
+
+    sales.forEach((sale) => {
+      const monthIndex = parseInt(sale.month, 10) - 1;
+      if (parseInt(sale.year, 10) === currentYear) {
+        thisYearData[monthIndex] = parseFloat(sale.total);
+      } else if (parseInt(sale.year, 10) === lastYear) {
+        lastYearData[monthIndex] = parseFloat(sale.total);
+      }
+    });
+
+    return { thisYear: thisYearData, lastYear: lastYearData };
   }
 }
