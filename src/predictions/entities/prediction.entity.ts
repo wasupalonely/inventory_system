@@ -20,7 +20,7 @@ export class Prediction {
   @Column()
   result: Label;
 
-  @Column()
+  @Column({ nullable: true })
   image: string;
 
   @Column({ type: 'float' })
