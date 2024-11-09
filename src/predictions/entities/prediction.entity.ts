@@ -20,6 +20,9 @@ export class Prediction {
   @Column()
   result: Label;
 
+  @Column()
+  image: string;
+
   @Column({ type: 'float' })
   fresh: number;
 

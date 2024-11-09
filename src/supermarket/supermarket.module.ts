@@ -8,6 +8,7 @@ import { UserModule } from 'src/user/user.module';
 import { Address } from './entities/address.entity';
 import { HttpModule } from '@nestjs/axios';
 import { PredictionsModule } from 'src/predictions/predictions.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PredictionsModule } from 'src/predictions/predictions.module';
     forwardRef(() => UserModule),
     HttpModule,
     PredictionsModule,
+    NotificationsModule,
   ],
   controllers: [SupermarketController],
   providers: [SupermarketService],

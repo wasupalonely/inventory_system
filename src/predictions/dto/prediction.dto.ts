@@ -1,8 +1,13 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsUrl } from 'class-validator';
 import { Label } from 'src/shared/types/prediction';
 
 export class CreatePredictionDto {
+  @IsUrl()
+  @IsNotEmpty()
+  @ApiProperty()
+  image: string;
+
   @ApiProperty()
   @IsString()
   result: Label;
