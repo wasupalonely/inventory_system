@@ -39,6 +39,7 @@ import { NotificationsModule } from './notifications/notifications.module';
         autoLoadEntities: true,
         synchronize: true,
         entities: ['dist/**/entities/*.entity{.ts,.js}'],
+        timezone: '-05:00',
       }),
       inject: [ConfigService],
     }),

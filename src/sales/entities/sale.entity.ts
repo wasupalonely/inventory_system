@@ -18,7 +18,9 @@ export class Sale {
   @ManyToOne(() => User, (user) => user.sales)
   user: User;
 
-  @ManyToOne(() => Supermarket, (supermarket) => supermarket.sales)
+  @ManyToOne(() => Supermarket, (supermarket) => supermarket.sales, {
+    onDelete: 'CASCADE',
+  })
   supermarket: Supermarket;
 
   @OneToMany(() => SaleItem, (saleItem) => saleItem.sale, { cascade: true })

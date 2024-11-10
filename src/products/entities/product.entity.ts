@@ -64,13 +64,13 @@ export class Product {
     example: '2020-01-01T00:00:00.000Z',
     description: 'Product creation date',
   })
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
     description: 'Product update date',
   })
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 }

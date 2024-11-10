@@ -42,9 +42,10 @@ export class ProductsService {
     return await this.productRepo.findOne({ where: { id } });
   }
 
+  // products.service.ts
   async create(
     product: CreateProductDto,
-    image: Express.Multer.File,
+    image?: Express.Multer.File,
   ): Promise<Product> {
     const category = await this.categoryService.getCategoryByIdAndSupermarketId(
       product.categoryId,
@@ -68,8 +69,8 @@ export class ProductsService {
     }
 
     let imageUrl = null;
-    console.log('path', image.path);
     if (image) {
+      console.log('path', image.path);
       imageUrl = await this.uploadService.uploadImage(image.path, 'products');
     }
 

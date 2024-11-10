@@ -176,7 +176,15 @@ export class SupermarketService implements OnModuleInit {
             to: supermarket.owner.email,
             // text: `Notamos algo extraño en tu sección de existencias de carne el dia ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}, ¡Revisa tus existencias!`,
             html: `<h1>Hola! ${supermarket.owner.firstName}</h1>
-      <p>Notamos que en tu sección de carnes hay algo extraño el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}. Por favor, revisa el estado de las existencias y toma las medidas necesarias.</p>
+      <p>Notamos que en tu sección de carnes hay algo extraño el día ${moment(
+        prediction.createdAt,
+      )
+        .subtract(5, 'hours')
+        .locale('es')
+        .format('dddd, D [de] MMMM [a las] h:mm a')
+        .replace(/^\w/, (c) =>
+          c.toUpperCase(),
+        )}. Por favor, revisa el estado de las existencias y toma las medidas necesarias.</p>
       `,
           };
           await this.notificationsService.createNotification(
