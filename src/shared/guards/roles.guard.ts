@@ -18,7 +18,6 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    console.log(requiredRoles);
 
     if (!requiredRoles) {
       return true; // Si no se requieren roles específicos, permite el acceso
@@ -26,7 +25,6 @@ export class RolesGuard implements CanActivate {
 
     // Obtener el usuario de la solicitud
     const { user } = context.switchToHttp().getRequest();
-    console.log('🚀 ~ RolesGuard ~ canActivate ~ user:', user);
 
     if (!user || !user.role) {
       throw new ForbiddenException('User role not found');

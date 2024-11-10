@@ -12,14 +12,11 @@ import { join } from 'path';
     MulterModule.register({
       storage: diskStorage({
         destination: (req, file, cb) => {
-          // Usar join para crear la ruta absoluta correcta
           const uploadPath = join(process.cwd(), 'uploads');
-          console.log('Upload path:', uploadPath); // Para verificar la ruta
           cb(null, uploadPath);
         },
         filename: (req, file, cb) => {
           const filename = `${Date.now()}-${file.originalname}`;
-          console.log('Creating file:', filename); // Para verificar el nombre del archivo
           cb(null, filename);
         },
       }),

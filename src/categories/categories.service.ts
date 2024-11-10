@@ -48,8 +48,6 @@ export class CategoriesService {
       category.supermarketId,
     );
 
-    console.log('SUPERMARKET', supermarket);
-
     if (!supermarket) {
       throw new NotFoundException(
         `Supermarket with ID ${category.supermarketId} not found`,

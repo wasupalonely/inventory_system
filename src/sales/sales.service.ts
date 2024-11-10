@@ -211,7 +211,9 @@ export class SalesService {
     return sales;
   }
 
-  async getMonthlySalesDataBySupermarket(supermarketId: number): Promise<{ thisYear: number[], lastYear: number[] }> {
+  async getMonthlySalesDataBySupermarket(
+    supermarketId: number,
+  ): Promise<{ thisYear: number[]; lastYear: number[] }> {
     const currentYear = new Date().getFullYear();
     const lastYear = currentYear - 1;
 
@@ -221,10 +223,13 @@ export class SalesService {
       .addSelect('EXTRACT(YEAR FROM sale.date)', 'year')
       .addSelect('SUM(sale.totalPrice)', 'total')
       .where('sale.supermarketId = :supermarketId', { supermarketId })
-      .andWhere('EXTRACT(YEAR FROM sale.date) = :currentYear OR EXTRACT(YEAR FROM sale.date) = :lastYear', {
-        currentYear,
-        lastYear,
-      })
+      .andWhere(
+        'EXTRACT(YEAR FROM sale.date) = :currentYear OR EXTRACT(YEAR FROM sale.date) = :lastYear',
+        {
+          currentYear,
+          lastYear,
+        },
+      )
       .groupBy('year')
       .addGroupBy('month')
       .orderBy('year', 'DESC')
@@ -244,5 +249,17 @@ export class SalesService {
     });
 
     return { thisYear: thisYearData, lastYear: lastYearData };
+  }
+
+  async getTotalEarningsBySupermarket(
+    supermarketId: number,
+  ): Promise<{ totalEarnings: number }> {
+    await this.supermarketService.getSupermarket(supermarketId);
+    const sales = await this.getSalesBySupermarket(supermarketId);
+    const totalEarnings = sales.reduce(
+      (total, sale) => total + sale.totalPrice,
+      0,
+    );
+    return { totalEarnings };
   }
 }

@@ -90,9 +90,15 @@ export class SupermarketService implements OnModuleInit {
     cronjobEnabled: boolean,
     scheduleFrequency: ScheduleFrequency,
   ): Promise<void> {
+    const supermarket = await this.getSupermarket(supermarketId);
+
     await this.supermarketRepo.update(supermarketId, {
       cronjobEnabled,
-      scheduleFrequency,
+      scheduleFrequency:
+        supermarket.testModeUsed &&
+        scheduleFrequency === ScheduleFrequency.EVERY_MINUTE
+          ? ScheduleFrequency.DAILY
+          : scheduleFrequency,
       startTime: new Date(),
     });
 
@@ -125,6 +131,10 @@ export class SupermarketService implements OnModuleInit {
         console.log(
           `Límite de modo de prueba alcanzado para supermercado ${supermarketId}. Cambiando a DAILY.`,
         );
+        await this.updateSupermarket(supermarketId, {
+          testModeUsed: true,
+        });
+        
         await this.updateCronStatus(
           supermarketId,
           true,
@@ -201,13 +211,16 @@ export class SupermarketService implements OnModuleInit {
     job.start();
   }
 
-  private stopCronJobIfExists(supermarketId: number) {
+  private async stopCronJobIfExists(supermarketId: number) {
     const jobName = `supermarketCron-${supermarketId}`;
     if (this.schedulerRegistry.doesExist('cron', jobName)) {
       const existingJob = this.schedulerRegistry.getCronJob(jobName);
       existingJob.stop();
       this.schedulerRegistry.deleteCronJob(jobName);
       console.log(`Cronjob ${jobName} detenido y eliminado.`);
+      await this.updateSupermarket(supermarketId, {
+        testModeUsed: true,
+      });
     }
   }
 
