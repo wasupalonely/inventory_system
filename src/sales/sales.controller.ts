@@ -60,4 +60,9 @@ export class SalesController {
       lastYear: salesData.lastYear,
     };
   }
+
+  @Get('total-earnings/:supermarketId')
+  async getTotalEarningsBySupermarket(@Param('supermarketId', ParseIntPipe) supermarketId: number) {
+    return this.salesService.getTotalEarningsBySupermarket(supermarketId);
+  }
 }
