@@ -14,7 +14,9 @@ export class Prediction {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Supermarket)
+  @ManyToOne(() => Supermarket, (supermarket) => supermarket.predictions, {
+    onDelete: 'CASCADE',
+  })
   supermarket: Supermarket;
 
   @Column()

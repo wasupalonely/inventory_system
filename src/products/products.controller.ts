@@ -52,7 +52,7 @@ export class ProductsController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   createProduct(
     @Body() product: CreateProductDto,
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile() image?: Express.Multer.File,
   ) {
     console.log('IMAGE ---->', image);
     return this.productsService.create(product, image);

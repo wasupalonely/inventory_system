@@ -4,8 +4,6 @@ import { NotificationsService } from './notifications.service';
 import { Notification } from './entities/notifications.entity';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
-import { Roles } from 'src/shared/decorators/roles.decorators';
-import { Role } from 'src/shared/enums/roles.enum';
 
 @ApiTags('Notifications')
 @Controller('notifications')
@@ -13,7 +11,6 @@ import { Role } from 'src/shared/enums/roles.enum';
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  @Roles(Role.Admin, Role.Owner)
   @Get('supermarket/:supermarketId')
   async getNotificationsBySupermarketId(
     @Param('supermarketId') supermarketId: number,
