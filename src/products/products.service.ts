@@ -70,7 +70,6 @@ export class ProductsService {
 
     let imageUrl = null;
     if (image) {
-      console.log('path', image.path);
       imageUrl = await this.uploadService.uploadImage(image.path, 'products');
     }
 

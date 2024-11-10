@@ -1,5 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import {
+  IsBoolean,
   // IsBoolean,
   IsEnum,
   IsNotEmpty,
@@ -84,6 +85,11 @@ export class CreateSupermarketDto {
   @IsEnum(ScheduleFrequency, { message: 'Frecuencia no válida' })
   @IsOptional()
   scheduleFrequency: ScheduleFrequency;
+
+  @ApiProperty({ example: false, required: false })
+  @IsBoolean()
+  @IsOptional()
+  testModeUsed: boolean;
 
   // @ApiProperty({ example: fasle, required: false })
   // @IsOptional()

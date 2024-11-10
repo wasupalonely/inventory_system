@@ -80,11 +80,11 @@ export class SupermarketController {
   @UseGuards(RolesGuard)
   @Roles(Role.Owner, Role.Admin)
   @Patch(':supermarketId/enable-cron')
-  async enableCronJob(@Param('supermarketId') supermarketId: number) {
+  async enableCronJob(@Param('supermarketId') supermarketId: number, scheduleFrequency: ScheduleFrequency) {
     await this.supermarketService.updateCronStatus(
       supermarketId,
       true,
-      ScheduleFrequency.EVERY_MINUTE,
+      scheduleFrequency,
     );
     return { message: 'Cronjob habilitado' };
   }

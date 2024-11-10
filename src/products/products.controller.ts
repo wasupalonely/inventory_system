@@ -54,7 +54,6 @@ export class ProductsController {
     @Body() product: CreateProductDto,
     @UploadedFile() image?: Express.Multer.File,
   ) {
-    console.log('IMAGE ---->', image);
     return this.productsService.create(product, image);
   }
 

@@ -98,6 +98,9 @@ export class Supermarket {
   })
   scheduleFrequency: ScheduleFrequency;
 
+  @Column({ default: false })
+  testModeUsed: boolean;
+
   @Column({ type: 'timestamp', nullable: true })
   startTime: Date;
 
