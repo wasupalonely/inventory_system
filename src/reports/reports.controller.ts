@@ -3,8 +3,9 @@ import { Controller, Get, Query, Res } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { Response } from 'express';
 import { ReportFiltersDto } from './dto/report-filters.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Reports')
 @Controller('reports')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}

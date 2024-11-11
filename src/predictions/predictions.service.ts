@@ -56,4 +56,14 @@ export class PredictionsService {
     );
     return this.predictionRepository.save(updatedPrediction);
   }
+
+  async getById(id: number): Promise<Prediction> {
+    const prediction = this.predictionRepository.findOne({ where: { id } });
+
+    if (!prediction) {
+      throw new NotFoundException('Prediction not found');
+    }
+
+    return prediction;
+  }
 }

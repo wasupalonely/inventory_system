@@ -21,6 +21,13 @@ export class PredictionsController {
     return this.predictionsService.getPredictionsBySupermarket(id);
   }
 
+  @Get(':id')
+  @ApiResponse({ status: 200, description: 'Prediction found successfully' })
+  @ApiResponse({ status: 404, description: 'Prediction not found' })
+  getPrediction(@Param('id') id: number) {
+    return this.predictionsService.getById(id);
+  }
+
   @Post()
   @ApiResponse({ status: 201, description: 'Prediction created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
