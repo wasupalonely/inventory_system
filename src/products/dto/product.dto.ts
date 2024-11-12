@@ -41,7 +41,7 @@ export class CreateProductDto {
     return Number(value);
   })
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   categoryId: number;
 
   @ApiProperty({
