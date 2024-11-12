@@ -54,7 +54,8 @@ export class SalesController {
   async getMonthlySalesDataBySupermarket(
     @Param('supermarketId', ParseIntPipe) supermarketId: number,
   ) {
-    const salesData = await this.salesService.getMonthlySalesDataBySupermarket(supermarketId);
+    const salesData =
+      await this.salesService.getMonthlySalesDataBySupermarket(supermarketId);
     return {
       thisYear: salesData.thisYear,
       lastYear: salesData.lastYear,
@@ -62,7 +63,9 @@ export class SalesController {
   }
 
   @Get('total-earnings/:supermarketId')
-  async getTotalEarningsBySupermarket(@Param('supermarketId', ParseIntPipe) supermarketId: number) {
+  async getTotalEarningsBySupermarket(
+    @Param('supermarketId', ParseIntPipe) supermarketId: number,
+  ) {
     return this.salesService.getTotalEarningsBySupermarket(supermarketId);
   }
 }
