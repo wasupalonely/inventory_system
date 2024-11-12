@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { PredictionsService } from './predictions.service';
 import { CreatePredictionDto, UpdatePredictionDto } from './dto/prediction.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';

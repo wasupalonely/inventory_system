@@ -46,7 +46,10 @@ export class Product {
   @Column()
   price: number;
 
-  @ManyToOne(() => Category, (category) => category.products)
+  @ManyToOne(() => Category, (category) => category.products, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   category: Category;
 
   @ManyToOne(() => Supermarket, (supermarket) => supermarket.products, {
