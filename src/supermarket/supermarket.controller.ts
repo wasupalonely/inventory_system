@@ -21,6 +21,7 @@ import {
 } from './dto/supermarket.dto';
 import { Supermarket } from './entities/supermarket.entity';
 import { ScheduleFrequency } from 'src/shared/enums/schedule-frequency';
+import { ScheduleFrequencyDto } from './dto/schedule.dto';
 
 @ApiTags('Supermarket')
 @UseGuards(JwtAuthGuard)
@@ -80,11 +81,14 @@ export class SupermarketController {
   @UseGuards(RolesGuard)
   @Roles(Role.Owner, Role.Admin)
   @Patch(':supermarketId/enable-cron')
-  async enableCronJob(@Param('supermarketId') supermarketId: number, scheduleFrequency: ScheduleFrequency) {
+  async enableCronJob(
+    @Param('supermarketId') supermarketId: number,
+    @Body() dto: ScheduleFrequencyDto,
+  ) {
     await this.supermarketService.updateCronStatus(
       supermarketId,
       true,
-      scheduleFrequency,
+      dto.scheduleFrequency,
     );
     return { message: 'Cronjob habilitado' };
   }
