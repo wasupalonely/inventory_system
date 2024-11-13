@@ -6,6 +6,7 @@ import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { SupermarketService } from 'src/supermarket/supermarket.service';
 import { CategoriesService } from 'src/categories/categories.service';
 import { UploadService } from 'src/upload/upload.service';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Injectable()
 export class ProductsService {
@@ -47,15 +48,18 @@ export class ProductsService {
     product: CreateProductDto,
     image?: Express.Multer.File,
   ): Promise<Product> {
-    const category = await this.categoryService.getCategoryByIdAndSupermarketId(
-      product.categoryId,
-      product.supermarketId,
-    );
-
-    if (!category) {
-      throw new NotFoundException(
-        `Category with ID ${product.categoryId} not found for supermarket ${product.supermarketId}`,
+    let category: Category | null = null;
+    if (product.categoryId) {
+      category = await this.categoryService.getCategoryByIdAndSupermarketId(
+        product.categoryId,
+        product.supermarketId,
       );
+
+      if (!category) {
+        throw new NotFoundException(
+          `Category with ID ${product.categoryId} not found for supermarket ${product.supermarketId}`,
+        );
+      }
     }
 
     const supermarket = await this.supermarketService.getSupermarket(
