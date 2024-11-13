@@ -2,7 +2,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Product } from 'src/products/entities/product.entity';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Inventory {
@@ -29,4 +36,18 @@ export class Inventory {
   })
   @Column({ type: 'int' })
   stock: number;
+
+  @ApiProperty({
+    example: '2020-01-01T00:00:00.000Z',
+    description: 'The creation date of the inventory',
+  })
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @ApiProperty({
+    example: '2020-01-01T00:00:00.000Z',
+    description: 'The update date of the inventory',
+  })
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
