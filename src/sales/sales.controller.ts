@@ -31,7 +31,7 @@ export class SalesController {
     return this.salesService.createSale(createSaleDto);
   }
 
-  @Roles(Role.Admin, Role.Cashier, Role.Owner)
+  @Roles(Role.Admin, Role.Cashier, Role.Owner, Role.Viewer)
   @Post(':saleId/invoice')
   @ApiResponse({ status: 201, description: 'Invoice generated successfully' })
   @ApiResponse({ status: 404, description: 'Sale not found' })
