@@ -26,6 +26,7 @@ import { CreatePredictionDto } from 'src/predictions/dto/prediction.dto';
 import { PredictionsService } from 'src/predictions/predictions.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { CreateNotificationDto } from 'src/notifications/dto/notification.dto';
+import { ConfigService } from '@nestjs/config';
 // import * as fs from 'fs';
 // import * as path from 'path';
 
@@ -50,6 +51,7 @@ export class SupermarketService implements OnModuleInit {
     private readonly userService: UserService,
     private readonly predictionsService: PredictionsService,
     private readonly notificationsService: NotificationsService,
+    private readonly configService: ConfigService,
   ) {}
 
   async onModuleInit() {
@@ -134,7 +136,7 @@ export class SupermarketService implements OnModuleInit {
         await this.updateSupermarket(supermarketId, {
           testModeUsed: true,
         });
-        
+
         await this.updateCronStatus(
           supermarketId,
           true,
@@ -171,10 +173,12 @@ export class SupermarketService implements OnModuleInit {
           prediction.result === 'Half-fresh'
         ) {
           const notification: CreateNotificationDto = {
-            supermarketId,
+            supermarketId: prediction.supermarket.id,
             title: 'Alerta de frescura en tu carne',
             message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}, ¡Revisa tus existencias!`,
           };
+
+          const predictionDetailUrl = `${this.configService.get('CLIENT_URL')}/dashboard/predictions?predictionId=${prediction.id}`;
 
           const mailToSend: {
             to: string;
@@ -195,6 +199,7 @@ export class SupermarketService implements OnModuleInit {
         .replace(/^\w/, (c) =>
           c.toUpperCase(),
         )}. Por favor, revisa el estado de las existencias y toma las medidas necesarias.</p>
+        <p>Puedes revisar acá los detalles de la alerta <a href="${predictionDetailUrl}" style="color: #1a73e8; text-decoration: none;">Haciendo clic aquí</a></p>
       `,
           };
           await this.notificationsService.createNotification(
