@@ -174,20 +174,6 @@ export class ReportsController {
     );
   }
 
-  @Get('average-inventory-time')
-  @ApiOperation({ summary: 'Get average inventory time metrics' })
-  async getAverageInventoryTime(
-    @Query('supermarketId') supermarketId: number,
-    @Query('startDate') startDate?: Date,
-    @Query('endDate') endDate?: Date,
-  ) {
-    return this.reportsService.getAverageInventoryTime(
-      supermarketId,
-      startDate,
-      endDate,
-    );
-  }
-
   @Get('critical-stock')
   @ApiOperation({ summary: 'Get products with critical stock levels' })
   async getProductsWithCriticalStock(
@@ -207,5 +193,16 @@ export class ReportsController {
     @Res() response: Response,
   ) {
     return this.reportsService.generateCompleteReportPDF(filters, response);
+  }
+
+  @Get('costs-report')
+  async getCostsReport(
+    @Query('supermarketId') supermarketId: number,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const start = startDate ? new Date(startDate) : undefined;
+    const end = endDate ? new Date(endDate) : undefined;
+    return this.reportsService.getCostsReport(supermarketId, start, end);
   }
 }

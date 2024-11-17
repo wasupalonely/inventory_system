@@ -32,6 +32,18 @@ export class CreateProductDto {
   price: number;
 
   @ApiProperty({
+    example: 1600,
+    required: true,
+  })
+  @Transform(({ value }) => {
+    if (value === '') return undefined;
+    return Number(value);
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  unitCost: number;
+
+  @ApiProperty({
     example: 10,
     required: true,
     description: 'The id of the category associated to the product',
