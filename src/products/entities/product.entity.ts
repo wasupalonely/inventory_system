@@ -46,6 +46,13 @@ export class Product {
   @Column()
   price: number;
 
+  @ApiProperty({
+    example: 1500,
+    description: 'The unit cost of the product',
+  })
+  @Column()
+  unitCost: number;
+
   @ManyToOne(() => Category, (category) => category.products, {
     nullable: true,
     onDelete: 'SET NULL',

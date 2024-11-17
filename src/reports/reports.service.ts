@@ -1,7 +1,7 @@
 // src/reports/reports.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import * as PDFDocument from 'pdfkit';
 import * as moment from 'moment';
 import { Response } from 'express';
@@ -175,6 +175,7 @@ export class ReportsService {
     }
 
     query
+      .addSelect('SUM(saleItems.quantity * product.unitCost)', 'totalCostos')
       .groupBy('product.id, product.name') // Agregado product.name al groupBy
       .orderBy('cantidad', 'ASC'); // Usando el nuevo alias
 
@@ -195,14 +196,15 @@ export class ReportsService {
       .addSelect('SUM(saleItems.quantity)', 'cantidad') // Cambiado el alias
       .where('sale.supermarketId = :supermarketId', { supermarketId });
 
-    if (startDate && endDate) {
-      query.andWhere('sale.date BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      });
+    if (startDate) {
+      query.andWhere('sale.date >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('sale.date <= :endDate', { endDate });
     }
 
     query
+      .addSelect('SUM(saleItems.quantity * product.unitCost)', 'totalCostos')
       .groupBy('product.id, product.name') // Agregado product.name al groupBy
       .orderBy('cantidad', 'DESC'); // Usando el nuevo alias
 
@@ -216,17 +218,28 @@ export class ReportsService {
   ) {
     const query = this.saleRepository
       .createQueryBuilder('sale')
-      .select('SUM(sale.totalPrice)', 'ganancias_totales')
+      .leftJoin('sale.saleItems', 'saleItems')
+      .leftJoin('saleItems.product', 'product')
+      .select('SUM(saleItems.quantity * product.price)', 'total_ingresos')
+      .addSelect('SUM(saleItems.quantity * product.unitCost)', 'total_costos')
       .where('sale.supermarketId = :supermarketId', { supermarketId });
 
-    if (startDate && endDate) {
-      query.andWhere('sale.date BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      });
+    if (startDate) {
+      query.andWhere('sale.date >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('sale.date <= :endDate', { endDate });
     }
 
-    return query.getRawOne();
+    const result = await query.getRawOne();
+    const ganancias_netas =
+      parseFloat(result.total_ingresos) - parseFloat(result.total_costos);
+
+    return {
+      total_ingresos: parseFloat(result.total_ingresos),
+      total_costos: parseFloat(result.total_costos),
+      ganancias_netas,
+    };
   }
 
   async getMeatFreshnessStatus(
@@ -240,11 +253,11 @@ export class ReportsService {
       .addSelect('COUNT(prediction.id)', 'cantidad')
       .where('prediction.supermarketId = :supermarketId', { supermarketId });
 
-    if (startDate && endDate) {
-      query.andWhere('prediction.createdAt BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      });
+    if (startDate) {
+      query.andWhere('prediction.createdAt >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('prediction.createdAt <= :endDate', { endDate });
     }
 
     query.groupBy('prediction.result');
@@ -277,10 +290,12 @@ export class ReportsService {
         userId ? { userId } : {},
       )
       .andWhere(
-        startDate && endDate
-          ? 'sale.date BETWEEN :startDate AND :endDate'
-          : '1=1',
-        startDate && endDate ? { startDate, endDate } : {},
+        startDate ? 'sale.date >= :startDate' : '1=1',
+        startDate ? { startDate } : {},
+      )
+      .andWhere(
+        endDate ? 'sale.date <= :endDate' : '1=1',
+        endDate ? { endDate } : {},
       )
       .groupBy(
         '"user"."id", "user"."firstName", "user"."lastName", "product"."id", "product"."name"',
@@ -321,11 +336,11 @@ export class ReportsService {
       )
       .where('sale.supermarketId = :supermarketId', { supermarketId });
 
-    if (startDate && endDate) {
-      query.andWhere('sale.date BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      });
+    if (startDate) {
+      query.andWhere('sale.date >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('sale.date <= :endDate', { endDate });
     }
 
     return query
@@ -348,11 +363,11 @@ export class ReportsService {
       .addSelect(`TO_CHAR(prediction.createdAt, 'YYYY-MM') AS fecha`)
       .where('prediction.supermarketId = :supermarketId', { supermarketId });
 
-    if (startDate && endDate) {
-      query.andWhere('prediction.createdAt BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      });
+    if (startDate) {
+      query.andWhere('prediction.createdAt >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('prediction.createdAt <= :endDate', { endDate });
     }
 
     return query
@@ -371,8 +386,10 @@ export class ReportsService {
     const query = this.predictionRepository
       .createQueryBuilder('prediction')
       .select([
-        `COUNT(CASE WHEN prediction.result = 'Spoiled' THEN 1 END)::float / 
-         COUNT(*)::float * 100 AS spoiledPercentage`,
+        `CASE 
+            WHEN COUNT(*) = 0 THEN 0 
+            ELSE COUNT(CASE WHEN prediction.result = 'Spoiled' THEN 1 END)::float / COUNT(*)::float * 100 
+         END AS spoiledPercentage`, // Evita la división por cero
         'COUNT(*) AS totalPredictions',
         `COUNT(CASE WHEN prediction.result = 'Spoiled' THEN 1 END) AS spoiledCount`,
         'AVG(prediction.spoiled) AS avgSpoiledConfidence',
@@ -383,11 +400,11 @@ export class ReportsService {
       ])
       .where('prediction.supermarketId = :supermarketId', { supermarketId });
 
-    if (startDate && endDate) {
-      query.andWhere('prediction.createdAt BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      });
+    if (startDate) {
+      query.andWhere('prediction.createdAt >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('prediction.createdAt <= :endDate', { endDate });
     }
 
     return query.getRawOne();
@@ -398,55 +415,87 @@ export class ReportsService {
     startDate?: Date,
     endDate?: Date,
   ) {
-    const query = this.predictionRepository
+    const results = await this.predictionRepository
       .createQueryBuilder('prediction')
       .select([
-        `TO_CHAR(prediction.createdAt, 'YYYY-MM-DD') AS "date"`, // Usar comillas dobles en el alias
+        `TO_CHAR(prediction.createdAt, 'YYYY-MM-DD') AS "date"`,
         'prediction.result AS "status"',
         'COUNT(prediction.id) AS "count"',
         'AVG(prediction.spoiled) AS "avgSpoiledConfidence"',
         'AVG(prediction.fresh) AS "avgFreshConfidence"',
         'AVG(prediction.halfFresh) AS "avgHalfFreshConfidence"',
       ])
-      .where('prediction.supermarketId = :supermarketId', { supermarketId });
+      .where('prediction.supermarketId = :supermarketId', { supermarketId })
+      .andWhere(
+        new Brackets((qb) => {
+          if (startDate)
+            qb.andWhere('prediction.createdAt >= :startDate', { startDate });
+          if (endDate)
+            qb.andWhere('prediction.createdAt <= :endDate', { endDate });
+        }),
+      )
+      .groupBy('"date"')
+      .addGroupBy('prediction.result')
+      .orderBy('"date"', 'DESC')
+      .getRawMany();
 
-    if (startDate && endDate) {
-      query.andWhere('prediction.createdAt BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      });
+    // Si no hay datos, devolver valores predeterminados
+    if (results.length === 0) {
+      return [
+        {
+          date: startDate ? moment(startDate).format('YYYY-MM-DD') : 'N/A',
+          status: 'Spoiled',
+          count: 0,
+          avgSpoiledConfidence: 0,
+          avgFreshConfidence: 0,
+          avgHalfFreshConfidence: 0,
+        },
+        {
+          date: startDate ? moment(startDate).format('YYYY-MM-DD') : 'N/A',
+          status: 'Fresh',
+          count: 0,
+          avgSpoiledConfidence: 0,
+          avgFreshConfidence: 0,
+          avgHalfFreshConfidence: 0,
+        },
+        {
+          date: startDate ? moment(startDate).format('YYYY-MM-DD') : 'N/A',
+          status: 'Half-fresh',
+          count: 0,
+          avgSpoiledConfidence: 0,
+          avgFreshConfidence: 0,
+          avgHalfFreshConfidence: 0,
+        },
+      ];
     }
 
-    return query
-      .groupBy('"date"') // Usar comillas dobles en el alias del GROUP BY
-      .addGroupBy('prediction.result')
-      .orderBy('"date"', 'DESC') // Usar comillas dobles en el ORDER BY
-      .getRawMany();
+    return results;
   }
 
-  async getAverageInventoryTime(
+  async getCostsReport(
     supermarketId: number,
     startDate?: Date,
     endDate?: Date,
   ) {
-    const query = this.inventoryRepository
-      .createQueryBuilder('inventory')
-      .leftJoin('inventory.product', 'product')
-      .select('product.name', 'productName')
-      .addSelect(
-        'AVG(EXTRACT(EPOCH FROM (COALESCE(inventory.createdAt, CURRENT_TIMESTAMP) - inventory.createdAt)))/86400',
-        'averageDaysInStock',
-      )
-      .where('inventory.supermarketId = :supermarketId', { supermarketId });
+    const query = this.saleRepository
+      .createQueryBuilder('sale')
+      .leftJoin('sale.saleItems', 'saleItems')
+      .leftJoin('saleItems.product', 'product')
+      .select('product.id', 'id_producto')
+      .addSelect('product.name', 'nombre_producto')
+      .addSelect('SUM(saleItems.quantity)', 'cantidad_vendida')
+      .addSelect('SUM(saleItems.quantity * product.unitCost)', 'costo_total')
+      .where('sale.supermarketId = :supermarketId', { supermarketId });
 
-    if (startDate && endDate) {
-      query.andWhere('inventory.createdAt BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      });
+    if (startDate) {
+      query.andWhere('sale.date >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('sale.date <= :endDate', { endDate });
     }
 
-    return query.groupBy('product.name').getRawMany();
+    query.groupBy('product.id, product.name');
+    return query.getRawMany();
   }
 
   async getProductsWithCriticalStock(supermarketId: number) {
