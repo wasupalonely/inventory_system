@@ -253,17 +253,17 @@ export class SalesService {
 
   async getTotalEarningsBySupermarket(
     supermarketId: number,
-  ): Promise<{ totalNetEarnings: number }> {
+  ): Promise<{ totalEarnings: number }> {
     const sales = await this.saleItemRepository.find({
       where: { sale: { supermarket: { id: supermarketId } } },
       relations: ['product', 'sale'],
     });
 
-    const totalNetEarnings = sales.reduce((total, saleItem) => {
+    const totalEarnings = sales.reduce((total, saleItem) => {
       const unitProfit = saleItem.product.price - saleItem.product.unitCost;
       return total + unitProfit * saleItem.quantity;
     }, 0);
 
-    return { totalNetEarnings };
+    return { totalEarnings };
   }
 }
