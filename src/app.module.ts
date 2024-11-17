@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -19,6 +24,10 @@ import { CloudinaryConfig } from './config/cloudinary.config';
 import { UploadModule } from './upload/upload.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AuditModule } from './audit/audit.module';
+import { UserIdMiddleware } from './shared/middleware/user-id.middleware';
+import { UserController } from './user/user.controller';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -56,15 +65,59 @@ import { NotificationsModule } from './notifications/notifications.module';
     UploadModule,
     CloudinaryModule,
     NotificationsModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     CloudinaryConfig,
+    JwtService,
     // {
     //   provide: APP_GUARD,
     //   useClass: ThrottlerGuard,
     // },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(UserIdMiddleware).forRoutes(
+      // UserController,
+      {
+        path: 'users',
+        method: RequestMethod.POST,
+      },
+      {
+        path: 'users/:id',
+        method: RequestMethod.PUT,
+      },
+      {
+        path: 'users/superamarket/:id',
+        method: RequestMethod.DELETE,
+      },
+      {
+        path: 'inventory/add-stock',
+        method: RequestMethod.POST,
+      },
+      {
+        path: 'inventory/edit-stock/:productId/:supermarketId',
+        method: RequestMethod.PUT,
+      },
+      {
+        path: 'inventory/delete-inventory/:productId/:supermarketId',
+        method: RequestMethod.DELETE,
+      },
+      {
+        path: 'products',
+        method: RequestMethod.POST,
+      },
+      {
+        path: 'products/:id',
+        method: RequestMethod.PUT,
+      },
+      {
+        path: 'products/:id',
+        method: RequestMethod.DELETE,
+      },
+    );
+  }
+}
