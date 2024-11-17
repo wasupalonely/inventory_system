@@ -13,7 +13,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    return super.canActivate(context);
+    return super.canActivate(context); // Delega la validación del token
   }
 
   handleRequest(err: any, user: any, info: any): any {
@@ -25,6 +25,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         )
       );
     }
+
     return user;
   }
 }
