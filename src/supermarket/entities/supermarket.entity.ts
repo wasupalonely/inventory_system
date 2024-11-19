@@ -18,6 +18,7 @@ import { Sale } from 'src/sales/entities/sale.entity';
 import { ScheduleFrequency } from 'src/shared/enums/schedule-frequency';
 import { Prediction } from 'src/predictions/entities/prediction.entity';
 import { Notification } from 'src/notifications/entities/notifications.entity';
+import { AuditLog } from 'src/audit/entities/audit.entity';
 
 @Entity({ name: 'supermarket' })
 export class Supermarket {
@@ -87,6 +88,9 @@ export class Supermarket {
     onDelete: 'CASCADE',
   })
   notifications: Notification[];
+
+  @OneToMany(() => AuditLog, (auditLog) => auditLog.supermarket)
+  auditLogs: AuditLog[];
 
   @Column({ default: false })
   cronjobEnabled: boolean;

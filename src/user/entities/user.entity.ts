@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AuditLog } from 'src/audit/entities/audit.entity';
 import { Sale } from 'src/sales/entities/sale.entity';
 import { Role } from 'src/shared/enums/roles.enum';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
@@ -95,6 +96,9 @@ export class User {
 
   @OneToMany(() => Sale, (sale) => sale.user)
   sales: Sale[];
+
+  @OneToMany(() => AuditLog, (auditLog) => auditLog.user)
+  auditLogs: AuditLog[];
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',

@@ -50,6 +50,10 @@ export class AuthService {
     const payload = {
       email: userValidation.email,
       sub: userValidation.id,
+      supermarketId:
+        userValidation.role === Role.Owner
+          ? userValidation.ownedSupermarket.id
+          : userValidation.supermarket.id,
       role: userValidation.role,
     };
 

@@ -1,9 +1,12 @@
-// src/audit/audit-log.entity.ts
+import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity('audit_logs')
@@ -11,8 +14,18 @@ export class AuditLog {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ManyToOne(() => User, (user) => user.auditLogs, { nullable: true })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
   @Column({ nullable: true })
-  user_id: number;
+  supermarket_id: number;
+
+  @ManyToOne(() => Supermarket, (supermarket) => supermarket.auditLogs, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'supermarket_id' })
+  supermarket: Supermarket;
 
   @Column({ nullable: true })
   record_id: number;
