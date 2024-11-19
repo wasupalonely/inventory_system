@@ -91,7 +91,7 @@ export class AppModule implements NestModule {
         method: RequestMethod.PUT,
       },
       {
-        path: 'users/superamarket/:id',
+        path: 'users/supermarket/:id',
         method: RequestMethod.DELETE,
       },
       {

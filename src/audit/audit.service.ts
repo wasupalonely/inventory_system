@@ -21,4 +21,12 @@ export class AuditService {
       order: { timestamp: 'DESC' },
     });
   }
+
+  async getAuditsBySupermarketId(supermarketId: number): Promise<AuditLog[]> {
+    return await this.auditRepo.find({
+      where: { supermarket_id: supermarketId },
+      order: { timestamp: 'DESC' },
+      relations: ['supermarket', 'user'],
+    });
+  }
 }
