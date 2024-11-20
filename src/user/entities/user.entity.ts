@@ -97,7 +97,9 @@ export class User {
   @OneToMany(() => Sale, (sale) => sale.user)
   sales: Sale[];
 
-  @OneToMany(() => AuditLog, (auditLog) => auditLog.user)
+  @OneToMany(() => AuditLog, (auditLog) => auditLog.user, {
+    cascade: true,
+  })
   auditLogs: AuditLog[];
 
   @ApiProperty({

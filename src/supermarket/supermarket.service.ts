@@ -171,8 +171,7 @@ export class SupermarketService implements OnModuleInit {
 
         if (
           prediction.result === 'Spoiled' ||
-          prediction.result === 'Half-fresh' ||
-          prediction.result === 'Fresh'
+          prediction.result === 'Half-fresh'
         ) {
           const notification: CreateNotificationDto = {
             supermarketId: prediction.supermarket.id,
