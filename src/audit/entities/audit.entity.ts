@@ -23,6 +23,7 @@ export class AuditLog {
 
   @ManyToOne(() => Supermarket, (supermarket) => supermarket.auditLogs, {
     nullable: true,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'supermarket_id' })
   supermarket: Supermarket;

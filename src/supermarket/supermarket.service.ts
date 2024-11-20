@@ -50,6 +50,7 @@ export class SupermarketService implements OnModuleInit {
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private readonly predictionsService: PredictionsService,
+    @Inject(forwardRef(() => NotificationsService))
     private readonly notificationsService: NotificationsService,
     private readonly configService: ConfigService,
   ) {}
@@ -168,15 +169,22 @@ export class SupermarketService implements OnModuleInit {
         const prediction =
           await this.predictionsService.create(predictionParsed);
 
+        console.log('PREDICCION supermercado id', prediction.supermarket.id);
+
         if (
           prediction.result === 'Spoiled' ||
-          prediction.result === 'Half-fresh'
+          prediction.result === 'Half-fresh' ||
+          prediction.result === 'Fresh'
         ) {
           const notification: CreateNotificationDto = {
             supermarketId: prediction.supermarket.id,
             title: 'Alerta de frescura en tu carne',
             message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}, ¡Revisa tus existencias!`,
           };
+          console.log(
+            '🚀 ~ SupermarketService ~ job ~ notification:',
+            notification,
+          );
 
           const predictionDetailUrl = `${this.configService.get('CLIENT_URL')}/dashboard/predictions?predictionId=${prediction.id}`;
 

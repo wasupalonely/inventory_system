@@ -89,7 +89,9 @@ export class Supermarket {
   })
   notifications: Notification[];
 
-  @OneToMany(() => AuditLog, (auditLog) => auditLog.supermarket)
+  @OneToMany(() => AuditLog, (auditLog) => auditLog.supermarket, {
+    cascade: true,
+  })
   auditLogs: AuditLog[];
 
   @Column({ default: false })
