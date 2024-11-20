@@ -169,8 +169,6 @@ export class SupermarketService implements OnModuleInit {
         const prediction =
           await this.predictionsService.create(predictionParsed);
 
-        console.log('PREDICCION supermercado id', prediction.supermarket.id);
-
         if (
           prediction.result === 'Spoiled' ||
           prediction.result === 'Half-fresh' ||
@@ -181,10 +179,6 @@ export class SupermarketService implements OnModuleInit {
             title: 'Alerta de frescura en tu carne',
             message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}, ¡Revisa tus existencias!`,
           };
-          console.log(
-            '🚀 ~ SupermarketService ~ job ~ notification:',
-            notification,
-          );
 
           const predictionDetailUrl = `${this.configService.get('CLIENT_URL')}/dashboard/predictions?predictionId=${prediction.id}`;
 

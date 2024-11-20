@@ -28,10 +28,6 @@ export class NotificationsService {
     notification: CreateNotificationDto,
     mail?: { to: string; subject: string; text?: string; html?: string },
   ): Promise<Notification> {
-    console.log(
-      '🚀 ~ NotificationsService ~ notification IN SERVICE:',
-      notification,
-    );
     if (mail) {
       await this.mailService.sendMail(
         mail.to,
@@ -50,10 +46,6 @@ export class NotificationsService {
       title: notification.title,
       message: notification.message,
     });
-    console.log(
-      '🚀 ~ NotificationsService ~ notificationCreated created:',
-      notificationCreated,
-    );
 
     return await this.notificationRepository.save(notificationCreated);
   }
