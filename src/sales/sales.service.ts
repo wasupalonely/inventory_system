@@ -253,7 +253,8 @@ export class SalesService {
 
   async getTotalEarningsBySupermarket(
     supermarketId: number,
-  ): Promise<{ totalEarnings: number }> {
+  ): Promise<{ totalEarnings: number; unsoldProductsCost: number }> {
+    // Calcula las ganancias de los productos vendidos
     const sales = await this.saleItemRepository.find({
       where: { sale: { supermarket: { id: supermarketId } } },
       relations: ['product', 'sale'],
@@ -264,6 +265,16 @@ export class SalesService {
       return total + unitProfit * saleItem.quantity;
     }, 0);
 
-    return { totalEarnings };
+    // Calcula el costo de los productos no vendidos
+    const unsoldProducts = await this.inventoryRepository.find({
+      where: { supermarket: { id: supermarketId } },
+      relations: ['product'],
+    });
+
+    const unsoldProductsCost = unsoldProducts.reduce((total, inventoryItem) => {
+      return total + inventoryItem.stock * inventoryItem.product.unitCost;
+    }, 0);
+
+    return { totalEarnings, unsoldProductsCost };
   }
 }

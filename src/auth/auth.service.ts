@@ -14,6 +14,7 @@ import { MailService } from 'src/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { Role } from 'src/shared/enums/roles.enum';
 import { TokenService } from './token.service';
+import { NewTokenDto } from './dto/new-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +37,7 @@ export class AuthService {
 
   async login(user: LoginAuthDto) {
     const userValidation = await this.validateUser(user.email, user.password);
+    console.log('🚀 ~ AuthService ~ login ~ userValidation:', userValidation);
 
     if (!userValidation) {
       throw new BadRequestException(
@@ -52,7 +54,9 @@ export class AuthService {
       sub: userValidation.id,
       supermarketId:
         userValidation.role === Role.Owner
-          ? userValidation.ownedSupermarket.id
+          ? userValidation.ownedSupermarket
+            ? userValidation.ownedSupermarket.id
+            : null
           : userValidation.supermarket.id,
       role: userValidation.role,
     };
@@ -60,6 +64,19 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload, { expiresIn: '30d' }),
       user: userValidation,
+    };
+  }
+
+  async createNewToken(payload: NewTokenDto) {
+    const tokenPayload = {
+      email: payload.email,
+      sub: payload.id,
+      supermarketId: payload.supermarketId,
+      role: payload.role,
+    };
+
+    return {
+      access_token: this.jwtService.sign(tokenPayload, { expiresIn: '30d' }),
     };
   }
 
