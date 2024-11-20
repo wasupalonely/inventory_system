@@ -14,7 +14,10 @@ export class AuditLog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.auditLogs, { nullable: true })
+  @ManyToOne(() => User, (user) => user.auditLogs, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
@@ -23,6 +26,7 @@ export class AuditLog {
 
   @ManyToOne(() => Supermarket, (supermarket) => supermarket.auditLogs, {
     nullable: true,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'supermarket_id' })
   supermarket: Supermarket;

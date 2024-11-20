@@ -27,12 +27,10 @@ export class UserIdMiddleware implements NestMiddleware {
         const supermarketId = decoded?.supermarketId;
 
         if (userId) {
-          console.log('Setting app.user_id to:', userId);
           await this.dataSource.query(`SET app.user_id = '${userId}'`);
         }
 
         if (supermarketId) {
-          console.log('Setting app.supermarket_id to:', supermarketId);
           await this.dataSource.query(
             `SET app.supermarket_id = '${supermarketId}'`,
           );

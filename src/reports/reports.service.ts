@@ -63,10 +63,6 @@ export class ReportsService {
   }
 
   async generateSalesReportPDF(filters: ReportFiltersDto, response: Response) {
-    console.log(
-      '🚀 ~ ReportsService ~ generateSalesReportPDF ~ filters:',
-      filters,
-    );
     const sales = await this.getSalesReport(filters);
     const supermarket = await this.supermarketService.getSupermarket(
       filters.supermarketId,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notifications.entity';
@@ -11,6 +11,8 @@ export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
+    @Inject(forwardRef(() => SupermarketService))
+    private supermarketService: SupermarketService,
     private mailService: MailService,
   ) {}
 
@@ -26,7 +28,6 @@ export class NotificationsService {
     notification: CreateNotificationDto,
     mail?: { to: string; subject: string; text?: string; html?: string },
   ): Promise<Notification> {
-
     if (mail) {
       await this.mailService.sendMail(
         mail.to,
@@ -36,7 +37,17 @@ export class NotificationsService {
       );
     }
 
-    return await this.notificationRepository.save(notification);
+    const supermarket = await this.supermarketService.getSupermarket(
+      notification.supermarketId,
+    );
+
+    const notificationCreated = this.notificationRepository.create({
+      supermarket,
+      title: notification.title,
+      message: notification.message,
+    });
+
+    return await this.notificationRepository.save(notificationCreated);
   }
 
   async findNotificationBySupermarketId(

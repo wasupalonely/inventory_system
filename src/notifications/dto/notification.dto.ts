@@ -13,7 +13,7 @@ export class CreateNotificationDto {
   @IsNumber()
   @IsNotEmpty()
   supermarketId: number;
-}8
+}
 
 export class UpdateNotificationDto extends PartialType(
   OmitType(CreateNotificationDto, ['supermarketId'] as const),

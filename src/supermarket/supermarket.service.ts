@@ -50,6 +50,7 @@ export class SupermarketService implements OnModuleInit {
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private readonly predictionsService: PredictionsService,
+    @Inject(forwardRef(() => NotificationsService))
     private readonly notificationsService: NotificationsService,
     private readonly configService: ConfigService,
   ) {}
