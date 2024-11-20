@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginAuthDto } from './dto/login.dto';
 import { CreateUserDto } from 'src/user/dto/user.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { NewTokenDto } from './dto/new-token.dto';
 // import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 // @SkipThrottle()
@@ -72,5 +73,11 @@ export class AuthController {
   })
   async resendConfirmationEmail(@Param('userId') userId: number) {
     return this.authService.sendConfirmationEmail(userId);
+  }
+
+  @Post('create-token')
+  @ApiResponse({ status: 200, description: 'Token creado exitosamente.' })
+  async createNewToken(@Body() newTokenDto: NewTokenDto) {
+    return this.authService.createNewToken(newTokenDto);
   }
 }
