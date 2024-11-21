@@ -24,6 +24,9 @@ export class Notification {
   supermarket: Supermarket;
 
   @Column()
+  predictionId: number;
+
+  @Column()
   title: string;
 
   @Column()

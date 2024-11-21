@@ -28,7 +28,6 @@ export class NotificationsService {
     notification: CreateNotificationDto,
     mail?: { to: string; subject: string; text?: string; html?: string },
   ): Promise<Notification> {
-    console.log('🚀 ~ NotificationsService ~ notification:', notification);
     if (mail) {
       await this.mailService.sendMail(
         mail.to,
@@ -41,9 +40,9 @@ export class NotificationsService {
     const supermarket = await this.supermarketService.getSupermarket(
       notification.supermarketId,
     );
-    console.log('🚀 ~ NotificationsService ~ supermarket:', supermarket);
 
     const notificationCreated = this.notificationRepository.create({
+      predictionId: notification.predictionId,
       supermarket,
       title: notification.title,
       message: notification.message,
