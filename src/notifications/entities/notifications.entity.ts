@@ -18,7 +18,9 @@ export class Notification {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Supermarket, (supermarket) => supermarket.notifications)
+  @ManyToOne(() => Supermarket, (supermarket) => supermarket.notifications, {
+    onDelete: 'CASCADE',
+  })
   supermarket: Supermarket;
 
   @Column()
