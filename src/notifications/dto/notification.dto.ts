@@ -13,6 +13,10 @@ export class CreateNotificationDto {
   @IsNumber()
   @IsNotEmpty()
   supermarketId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  predictionId: number;
 }
 
 export class UpdateNotificationDto extends PartialType(

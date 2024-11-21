@@ -39,6 +39,15 @@ export class SupermarketService implements OnModuleInit {
     'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1729543375/semi-fresh_xtoukp.jpg',
     'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1729543375/fresh_txjchq.jpg',
     'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1729543375/rotten_meat_pjpppc.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1732160684/z2a3dsj8ko57bvjzkxpj.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1732160684/hkiadmvus3iiwyngzhqm.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1732160684/t02oeeijuuh5zq2iksu4.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1732160684/pmhstzcwt7l44r3by9el.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1732160684/eunuaivdsaasxa2rqd9z.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1732160684/oudlhu0oizwvww68ejtl.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1732160683/fqbbhlg998mrp5iihrhs.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1732160683/rdhpq1hzs6jutxj6pol2.jpg',
+    'https://res.cloudinary.com/dzkeyfsjm/image/upload/v1732160683/bkybk624txh1ormnwrhw.jpg',
   ];
 
   constructor(
@@ -174,6 +183,7 @@ export class SupermarketService implements OnModuleInit {
           prediction.result === 'Half-fresh'
         ) {
           const notification: CreateNotificationDto = {
+            predictionId: prediction.id,
             supermarketId: prediction.supermarket.id,
             title: 'Alerta de frescura en tu carne',
             message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}, ¡Revisa tus existencias!`,
