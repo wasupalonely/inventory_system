@@ -1,3 +1,4 @@
+// src/products/entities/product.entity.ts
 import {
   Column,
   CreateDateColumn,
@@ -19,38 +20,39 @@ export class Product {
   id: number;
 
   @ApiProperty({
-    example: 'Lettuce',
-    description: 'THe name of the product',
+    example: 'Ribeye Steak',
+    description: 'The name of the meat product',
   })
   @Column()
   name: string;
 
   @ApiProperty({
-    example: 'Roman lettuce',
-    description: 'Product description',
+    example: 'A premium cut of ribeye steak.',
+    description: 'Description of the meat product',
   })
   @Column({ nullable: true })
   description: string;
 
   @ApiProperty({
     example: 'https://example.com/image.png',
-    description: 'Product image',
+    description: 'Image of the meat product',
   })
   @Column({ nullable: true })
   image: string;
 
   @ApiProperty({
     example: 1500,
-    description: 'The price of the product',
+    description: 'Selling price of the meat product per pound (in COP)',
   })
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
   price: number;
 
   @ApiProperty({
-    example: 1500,
-    description: 'The unit cost of the product',
+    example: 1000,
+    description:
+      'Cost of the meat product per pound from the supplier (in COP)',
   })
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
   unitCost: number;
 
   @ManyToOne(() => Category, (category) => category.products, {
@@ -72,14 +74,14 @@ export class Product {
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
-    description: 'Product creation date',
+    description: 'Creation date of the meat product entry',
   })
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',
-    description: 'Product update date',
+    description: 'Last update date of the meat product entry',
   })
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;

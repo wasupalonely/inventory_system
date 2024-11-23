@@ -18,6 +18,10 @@ export class CreatePredictionDto {
 
   @ApiProperty()
   @IsNumber()
+  cameraId: number;
+
+  @ApiProperty()
+  @IsNumber()
   fresh: number;
 
   @ApiProperty()

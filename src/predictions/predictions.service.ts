@@ -4,10 +4,12 @@ import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import { Repository } from 'typeorm';
 import { Prediction } from './entities/prediction.entity';
 import { CreatePredictionDto, UpdatePredictionDto } from './dto/prediction.dto';
+import { CameraService } from 'src/cameras/cameras.service';
 
 @Injectable()
 export class PredictionsService {
   constructor(
+    private cameraService: CameraService,
     @InjectRepository(Prediction)
     private predictionRepository: Repository<Prediction>,
 
@@ -18,6 +20,7 @@ export class PredictionsService {
   async getPredictionsBySupermarket(id: number): Promise<Prediction[]> {
     return this.predictionRepository.find({
       where: { supermarket: { id } },
+      relations: ['camera'],
     });
   }
 
@@ -30,9 +33,18 @@ export class PredictionsService {
       throw new NotFoundException('Supermercado no encontrado');
     }
 
+    const camera = await this.cameraService.findOne(
+      createPredictionDto.cameraId,
+    );
+
+    if (!camera) {
+      throw new NotFoundException('Camarero no encontrado');
+    }
+
     const newPrediction = this.predictionRepository.create({
       ...createPredictionDto,
       supermarket,
+      camera,
     });
 
     return this.predictionRepository.save(newPrediction);

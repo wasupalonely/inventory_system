@@ -71,6 +71,11 @@ export class CreateSupermarketDto {
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({ example: '123456789', required: true })
+  @IsString()
+  @IsNotEmpty()
+  nit: string;
+
   @ApiProperty({ example: 1, required: true })
   @IsNumber()
   @IsNotEmpty()

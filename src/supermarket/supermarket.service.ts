@@ -89,7 +89,7 @@ export class SupermarketService implements OnModuleInit {
   async getSupermarket(id: number): Promise<Supermarket> {
     const supermarket = await this.supermarketRepo.findOne({
       where: { id },
-      relations: ['address', 'owner', 'categories', 'users'],
+      relations: ['address', 'owner', 'categories', 'users', 'cameras'],
     });
     if (!supermarket) {
       throw new NotFoundException(`Supermercado con ID ${id} no encontrado`);
@@ -115,7 +115,13 @@ export class SupermarketService implements OnModuleInit {
     });
 
     if (cronjobEnabled) {
-      this.startOrUpdateCronJob(supermarketId);
+      if (!supermarket.cameras || supermarket.cameras.length === 0) {
+        throw new BadRequestException(
+          `El supermercado con ID ${supermarketId} no tiene camaras instaladas. Instala al menos una camara para activar las predicciones.`,
+        );
+      } else {
+        this.startOrUpdateCronJob(supermarketId);
+      }
     } else {
       this.stopCronJobIfExists(supermarketId);
     }
@@ -123,6 +129,12 @@ export class SupermarketService implements OnModuleInit {
 
   async startOrUpdateCronJob(supermarketId: number) {
     const supermarket = await this.getSupermarket(supermarketId);
+
+    if (!supermarket.cameras || supermarket.cameras.length === 0) {
+      throw new BadRequestException(
+        `El supermercado con ID ${supermarketId} no tiene cámaras instaladas. Instala al menos una cámara para activar el cronjob.`,
+      );
+    }
 
     const cronExpression = this.getCronExpression(
       supermarket.scheduleFrequency,
@@ -159,8 +171,14 @@ export class SupermarketService implements OnModuleInit {
         const randomImageUrl = this.getRandomImageUrl();
         const predictionData = await this.fetchPrediction(randomImageUrl);
 
+        const randomCamera =
+          supermarket.cameras[
+            Math.floor(Math.random() * supermarket.cameras.length)
+          ];
+
         const predictionToSave: PredictionResponse = predictionData[0];
         const predictionParsed: CreatePredictionDto = {
+          cameraId: randomCamera.id,
           image: randomImageUrl,
           supermarketId,
           result: predictionToSave.label,

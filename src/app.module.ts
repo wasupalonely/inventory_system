@@ -28,6 +28,7 @@ import { AuditModule } from './audit/audit.module';
 import { UserIdMiddleware } from './shared/middleware/user-id.middleware';
 import { UserController } from './user/user.controller';
 import { JwtService } from '@nestjs/jwt';
+import { CamerasModule } from './cameras/cameras.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { JwtService } from '@nestjs/jwt';
     CloudinaryModule,
     NotificationsModule,
     AuditModule,
+    CamerasModule,
   ],
   controllers: [AppController],
   providers: [
