@@ -1,3 +1,4 @@
+import { Camera } from 'src/cameras/entity/camera.entity';
 import { Label } from 'src/shared/types/prediction';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import {
@@ -18,6 +19,12 @@ export class Prediction {
     onDelete: 'CASCADE',
   })
   supermarket: Supermarket;
+
+  @ManyToOne(() => Camera, (camera) => camera.predictions, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  camera: Camera;
 
   @Column()
   result: Label;

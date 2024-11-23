@@ -19,6 +19,7 @@ import { ScheduleFrequency } from 'src/shared/enums/schedule-frequency';
 import { Prediction } from 'src/predictions/entities/prediction.entity';
 import { Notification } from 'src/notifications/entities/notifications.entity';
 import { AuditLog } from 'src/audit/entities/audit.entity';
+import { Camera } from 'src/cameras/entity/camera.entity';
 
 @Entity({ name: 'supermarket' })
 export class Supermarket {
@@ -35,6 +36,13 @@ export class Supermarket {
   })
   @Column()
   name: string;
+
+  @ApiProperty({
+    example: '123456789',
+    description: 'Supermarket nit',
+  })
+  @Column()
+  nit: string;
 
   @OneToOne(() => Address, (address) => address.supermarket, {
     cascade: true,
@@ -76,6 +84,13 @@ export class Supermarket {
     onDelete: 'CASCADE',
   })
   sales: Sale[];
+
+  @ApiProperty({
+    example: [],
+    description: 'Cameras installed in the supermarket',
+  })
+  @OneToMany(() => Camera, (camera) => camera.supermarket, { cascade: true })
+  cameras: Camera[];
 
   @OneToMany(() => Prediction, (prediction) => prediction.supermarket, {
     cascade: true,
