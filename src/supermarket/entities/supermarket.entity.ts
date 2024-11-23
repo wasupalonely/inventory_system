@@ -41,7 +41,7 @@ export class Supermarket {
     example: '123456789',
     description: 'Supermarket nit',
   })
-  @Column()
+  @Column({ nullable: true })
   nit: string;
 
   @OneToOne(() => Address, (address) => address.supermarket, {
