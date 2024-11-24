@@ -44,7 +44,7 @@ export class Product {
     example: 1500,
     description: 'Selling price of the meat product per pound (in COP)',
   })
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Column()
   price: number;
 
   @ApiProperty({
@@ -52,7 +52,7 @@ export class Product {
     description:
       'Cost of the meat product per pound from the supplier (in COP)',
   })
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Column()
   unitCost: number;
 
   @ManyToOne(() => Category, (category) => category.products, {
