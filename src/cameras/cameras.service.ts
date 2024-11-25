@@ -76,8 +76,14 @@ export class CameraService {
 
   async remove(id: number): Promise<void> {
     const camera = await this.findOne(id);
+
+    if (!camera) {
+      throw new NotFoundException(`Cámara con ID ${id} no encontrada.`);
+    }
+
     const supermarket = await this.supermarketRepo.findOne({
       where: { id: camera.supermarket.id },
+      relations: ['cameras'],
     });
 
     if (!supermarket) {
@@ -86,18 +92,14 @@ export class CameraService {
       );
     }
 
-    await this.supermarketRepo.update(supermarket.id, {
-      cameras: supermarket.cameras.filter((c) => c.id !== id),
-    });
+    await this.cameraRepo.delete({ id });
+
+    supermarket.cameras = supermarket.cameras.filter((c) => c.id !== id);
 
     if (supermarket.cameras.length === 0) {
       await this.supermarketRepo.update(supermarket.id, {
         cronjobEnabled: false,
       });
     }
-
-    await this.supermarketRepo.save(supermarket);
-
-    await this.cameraRepo.remove(camera);
   }
 }
