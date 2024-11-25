@@ -11,9 +11,11 @@ import { Product } from 'src/products/entities/product.entity';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import { CreateSaleDto } from './dto/sale.dto';
-import * as PDFDocument from 'pdfkit';
 import { Response } from 'express';
 import { SupermarketService } from 'src/supermarket/supermarket.service';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import * as moment from 'moment';
 
 @Injectable()
 export class SalesService {
@@ -78,116 +80,133 @@ export class SalesService {
     await this.saleRepository.save(sale);
     return sale;
   }
+  
 
-  async generateInvoicePDF(saleId: number, response: Response) {
-    const sale = await this.saleRepository.findOne({
-      where: { id: saleId },
-      relations: ['saleItems', 'saleItems.product', 'user', 'supermarket'],
-    });
+ async generateInvoicePDF(saleId: number, response: Response) {
+  const sale = await this.saleRepository.findOne({
+    where: { id: saleId },
+    relations: ['saleItems', 'saleItems.product', 'user', 'supermarket'],
+  });
 
-    if (!sale) {
-      throw new NotFoundException(`Venta con ID ${saleId} no encontrada`);
-    }
-
-    const doc = new PDFDocument({ margin: 50 });
-    response.setHeader('Content-Type', 'application/pdf');
-    response.setHeader(
-      'Content-Disposition',
-      `attachment; filename=factura_${saleId}.pdf`,
-    );
-
-    doc.pipe(response);
-
-    // Título de la factura (encabezado)
-    doc
-      .fontSize(20)
-      .font('Courier-Bold')
-      .text(`Factura de Venta #${saleId}`, { align: 'center' });
-    doc.moveDown(1);
-
-    // Detalles de la tienda y cliente
-    doc
-      .fontSize(12)
-      .font('Courier-Bold')
-      .text(`Supermercado:`, { align: 'left' });
-    doc
-      .fontSize(14)
-      .font('Courier')
-      .text(sale.supermarket.name, { align: 'left' });
-    doc.moveDown(0.5);
-
-    doc.fontSize(12).font('Courier-Bold').text(`Fecha:`, { align: 'left' });
-    doc
-      .fontSize(14)
-      .font('Courier')
-      .text(sale.date.toLocaleString(), { align: 'left' });
-    doc.moveDown(0.5);
-
-    doc.fontSize(12).font('Courier-Bold').text(`Vendedor:`, { align: 'left' });
-    doc
-      .fontSize(14)
-      .font('Courier')
-      .text(sale.user.getFullName(), { align: 'left' });
-    doc.moveDown(0.5);
-
-    doc.fontSize(12).font('Courier-Bold').text(`Total:`, { align: 'left' });
-    doc
-      .fontSize(14)
-      .font('Courier')
-      .text(`$${sale.totalPrice.toFixed(2)}`, { align: 'left' });
-
-    // Línea de separación
-    doc.moveDown(1);
-    doc.lineWidth(0.5).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-    doc.moveDown(1);
-
-    // Tabla de detalles de los productos
-    doc
-      .fontSize(16)
-      .font('Courier-Bold')
-      .text('Detalles de la Venta', { align: 'left' });
-    doc.moveDown(0.5);
-
-    // Encabezados de la tabla
-    doc
-      .fontSize(12)
-      .font('Courier-Bold')
-      .text(
-        `#   Producto             Cantidad   Precio Unitario      Subtotal`,
-        { width: 500, align: 'left' },
-      );
-    doc.moveDown(0.5);
-
-    // Líneas de los productos
-    let yPos = doc.y;
-    sale.saleItems.forEach((item, index) => {
-      doc
-        .fontSize(12)
-        .font('Courier')
-        .text(
-          `${index + 1}   ${item.product.name}           ${item.quantity}         $${item.product.price.toFixed(2)}         $${(item.product.price * item.quantity).toFixed(2)}`,
-          { width: 500, align: 'left' },
-        );
-      yPos = doc.y;
-    });
-
-    // Línea de separación final
-    doc.moveDown(1);
-    doc.lineWidth(0.5).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-
-    // Firma o notas adicionales (si es necesario)
-    doc.moveDown(1);
-    doc
-      .fontSize(12)
-      .font('Courier')
-      .text(
-        'Gracias por su compra. Si tiene alguna consulta, no dude en contactarnos.',
-        { align: 'center' },
-      );
-
-    // Finalizar el documento
-    doc.end();
+  if (!sale) {
+    throw new NotFoundException(`Venta con ID ${saleId} no encontrada`);
   }
+
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a0',
+  });
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const randomInvoiceNumber = Math.floor(Math.random() * 1000000);
+
+  // Encabezado
+  doc.setFont('Courier', 'bold');
+  doc.setFontSize(12);
+  doc.text('Factura Electrónica de Venta', 75, 10, { align: 'center' });
+  doc.setFont('Courier', 'normal');
+  doc.text(`No. ${randomInvoiceNumber}`, 75, 15, { align: 'center' });
+
+  doc.setFontSize(10);
+  doc.setFont('Courier', 'bold');
+  doc.text('Carnicería 1', 75, 25, { align: 'center' });
+  doc.text('NIT: 1234567890-1', 75, 30, { align: 'center' });
+  doc.text('Dirección: Calle 123 #45-67', 75, 35, { align: 'center' });
+
+  // Detalles generales
+  const detailsStartY = 45;
+  doc.setFont('Courier', 'normal');
+  doc.text(`Fecha y Hora: ${moment(sale.date).subtract(5, 'hours').format('DD MMM [del] YYYY')}`, 10, detailsStartY);
+  doc.text('Forma de Pago: Contado', 10, detailsStartY + 5);
+  doc.text('Medio de Pago: Efectivo', 10, detailsStartY + 10);
+  doc.text(`Vendedor: ${sale.user.getFullName()}`, 10, detailsStartY + 15);
+  doc.text('Cliente: CONSUMIDOR FINAL', 10, detailsStartY + 20);
+  doc.text('Documento: 222222222222', 10, detailsStartY + 25);
+  doc.text('Teléfono: 6063301300', 10, detailsStartY + 30);
+
+  // Línea separadora después de los detalles generales
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.5);
+  doc.line(10, detailsStartY + 35, 140, detailsStartY + 35);
+
+  // Tabla de productos
+  const tableStartY = detailsStartY + 40;
+  const tableColumns = [
+    { header: 'Producto', dataKey: 'product', width: 50 },
+    { header: 'Descripción', dataKey: 'description', width: 50 },
+    { header: 'Cant', dataKey: 'quantity', width: 30 },
+    { header: 'Precio', dataKey: 'price', width: 30 },
+  ];
+
+  const tableRows = sale.saleItems.map((item) => ({
+    product: item.product.name,
+    description: item.product.description || '-',
+    quantity: item.quantity,
+    price: formatCurrency(item.product.price),
+  }));
+
+  // Generamos la tabla
+  (doc as any).autoTable({
+    startY: tableStartY,
+    columns: tableColumns,
+    body: tableRows,
+    theme: 'plain',
+    styles: { font: 'Courier', fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+    headStyles: { fontStyle: 'bold' },
+    columnStyles: {
+      product: { cellWidth: 30, overflow: 'linebreak' },
+      description: { cellWidth: 30, overflow: 'linebreak' },
+      quantity: { cellWidth: 20 },
+      price: { cellWidth: 40 },
+    },
+    margin: { bottom: 10 }, // Añadimos margen para evitar que el contenido se corte
+  });
+
+  const afterTableY = (doc as any).lastAutoTable.finalY;
+
+  // Línea separadora después de la tabla
+  doc.line(10, afterTableY + 5, 140, afterTableY + 5);
+
+  // Totales
+  doc.text(`Subtotal: ${formatCurrency(sale.totalPrice)}`, 10, afterTableY + 10);
+  doc.text('IVA:      $0.00', 10, afterTableY + 15);
+  doc.text(`Total:    ${formatCurrency(sale.totalPrice)}`, 10, afterTableY + 20);
+
+  // Línea separadora antes de la información adicional
+  doc.line(10, afterTableY + 25, 140, afterTableY + 25);
+
+  // Información adicional
+  doc.text('PORTAL WEB PARA FACTURA ELECTRÓNICA EN', 75, afterTableY + 35, { align: 'center' });
+  doc.text('https://inventory-frontend-tau-ecru.vercel.app/', 75, afterTableY + 40, { align: 'center' });
+  doc.text('GRACIAS POR SU COMPRA', 75, afterTableY + 50, { align: 'center' });
+  doc.text('NO SE ACEPTAN DEVOLUCIONES', 75, afterTableY + 55, { align: 'center' });
+
+  // Línea separadora antes de la política de privacidad
+  doc.line(10, afterTableY + 60, 140, afterTableY + 60);
+
+  // Política de privacidad
+  doc.setFontSize(8);
+  const privacyText =
+    'La información proporcionada por el cliente será tratada de acuerdo con nuestra política de privacidad. ' +
+    'Los datos se utilizarán exclusivamente para la emisión de esta factura y otros fines legales relacionados.';
+
+  doc.text(privacyText, 10, afterTableY + 70, { maxWidth: 130, align: 'justify' });
+
+  // Exportar PDF a la respuesta
+  const pdfData = doc.output('arraybuffer');
+  response.setHeader('Content-Type', 'application/pdf');
+  response.setHeader('Content-Disposition', `attachment; filename=factura_${saleId}.pdf`);
+  response.send(Buffer.from(pdfData));
+}
 
   async getSales() {
     return this.saleRepository.find();
