@@ -35,6 +35,21 @@ export class CategoriesController {
     return this.categoriesService.getCategoriesBySupermarket(supermarketId);
   }
 
+  @Get('default')
+  @ApiResponse({ status: 200, type: [Category] })
+  getCategoriesByDefault() {
+    return this.categoriesService.getCategoriesByDefault();
+  }
+
+  @Get('supermarket/:supermarketId/default')
+  getCategoriesBySupermarketAndDefault(
+    @Param('supermarketId') supermarketId: number,
+  ) {
+    return this.categoriesService.getCategoriesBySupermarketAndDefault(
+      supermarketId,
+    );
+  }
+
   @Get(':id')
   @ApiResponse({ status: 200, type: Category })
   getCategory(@Param('id') id: number) {

@@ -10,6 +10,7 @@ import {
 import { Product } from '../../products/entities/product.entity';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Camera } from 'src/cameras/entity/camera.entity';
 
 @Entity('categories')
 export class Category {
@@ -21,18 +22,21 @@ export class Category {
   id: number;
 
   @ApiProperty({
-    example: 'Tropical fruits',
-    description: 'The name of the category',
+    example: 'Lomo fino',
+    description: 'The name of the cut',
   })
   @Column()
   name: string;
 
   @ApiProperty({
-    example: 'Fruits category',
-    description: 'THe description of the category',
+    example: '12',
+    description: 'THe description of the cut',
   })
   @Column({ nullable: true })
   description: string;
+
+  @Column({ default: false })
+  isDefault: boolean; // Si es un corte predeterminado
 
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
@@ -41,6 +45,9 @@ export class Category {
     onDelete: 'CASCADE',
   })
   supermarket: Supermarket;
+
+  @OneToMany(() => Camera, (camera) => camera.category)
+  cameras: Camera[];
 
   @ApiProperty({
     example: '2020-01-01T00:00:00.000Z',

@@ -81,6 +81,24 @@ export class CategoriesService {
     });
   }
 
+  async getCategoriesByDefault(): Promise<Category[]> {
+    return await this.categoryRepo.find({ where: { isDefault: true } });
+  }
+
+  async getCategoriesBySupermarketAndDefault(
+    supermarketId: number,
+  ): Promise<Category[]> {
+    const categoriesBySupermarket = await this.categoryRepo.find({
+      where: { supermarket: { id: supermarketId } },
+    });
+
+    const categoriesByDefault = await this.categoryRepo.find({
+      where: { isDefault: true },
+    });
+
+    return [...categoriesBySupermarket, ...categoriesByDefault];
+  }
+
   async update(id: number, category: UpdateCategoryDto): Promise<Category> {
     const existingCategory = await this.categoryRepo.findOne({ where: { id } });
     if (!existingCategory) {

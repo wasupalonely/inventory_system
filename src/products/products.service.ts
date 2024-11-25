@@ -50,10 +50,7 @@ export class ProductsService {
   ): Promise<Product> {
     let category: Category | null = null;
     if (product.categoryId) {
-      category = await this.categoryService.getCategoryByIdAndSupermarketId(
-        product.categoryId,
-        product.supermarketId,
-      );
+      category = await this.categoryService.findOne(product.categoryId);
 
       if (!category) {
         throw new NotFoundException(
@@ -120,11 +117,7 @@ export class ProductsService {
     delete updateData.categoryId;
 
     if (product.categoryId) {
-      const category =
-        await this.categoryService.getCategoryByIdAndSupermarketId(
-          product.categoryId,
-          existingProduct.supermarket.id,
-        );
+      const category = await this.categoryService.findOne(product.categoryId);
 
       if (!category) {
         throw new NotFoundException(
