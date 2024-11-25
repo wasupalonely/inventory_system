@@ -40,6 +40,14 @@ export class CreateCameraDto {
   @IsNotEmpty()
   @IsNumber()
   supermarketId: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID of the category (meat cut) this camera monitors',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  categoryId: number;
 }
 
 export class UpdateCameraDto extends PartialType(CreateCameraDto) {}

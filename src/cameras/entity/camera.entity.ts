@@ -9,6 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Supermarket } from 'src/supermarket/entities/supermarket.entity';
 import { Prediction } from 'src/predictions/entities/prediction.entity';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Entity('cameras')
 export class Camera {
@@ -33,6 +34,11 @@ export class Camera {
     onDelete: 'CASCADE',
   })
   supermarket: Supermarket;
+
+  @ManyToOne(() => Category, (category) => category.cameras, {
+    nullable: false, // Obligatorio asignar un corte
+  })
+  category: Category;
 
   @OneToMany(() => Prediction, (prediction) => prediction.camera)
   predictions: Prediction[];
