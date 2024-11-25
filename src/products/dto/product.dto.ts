@@ -29,7 +29,7 @@ export class CreateProductDto {
   })
   @IsNumber()
   @IsNotEmpty()
-  price: number;
+  pricePerPound: number;
 
   @ApiProperty({
     example: 1600,
@@ -42,6 +42,18 @@ export class CreateProductDto {
   @IsNumber()
   @IsNotEmpty()
   unitCost: number;
+
+  @ApiProperty({
+    example: 500,
+    required: true,
+  })
+  @Transform(({ value }) => {
+    if (value === '') return undefined;
+    return Number(value);
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  weight: number;
 
   @ApiProperty({
     example: 10,
