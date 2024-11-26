@@ -7,10 +7,11 @@ import { SupermarketModule } from 'src/supermarket/supermarket.module';
 import { Prediction } from 'src/predictions/entities/prediction.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
+import { Camera } from 'src/cameras/entity/camera.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Sale, Prediction, Product, Inventory]),
+    TypeOrmModule.forFeature([Sale, Prediction, Product, Inventory, Camera]),
     SupermarketModule,
   ],
   controllers: [ReportsController],

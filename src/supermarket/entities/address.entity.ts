@@ -88,4 +88,8 @@ export class Address {
 
   @OneToOne(() => Supermarket, (supermarket) => supermarket.address)
   supermarket: Supermarket;
+
+  getAddressStringFormatted() {
+    return `${this.locationType} ${this.streetNumber} # ${this.buildingNumber} - ${this.additionalInfo}. ${this.neighborhood}`;
+  }
 }

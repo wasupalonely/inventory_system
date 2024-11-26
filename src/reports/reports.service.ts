@@ -11,12 +11,15 @@ import { ReportFiltersDto } from './dto/report-filters.dto';
 import { Prediction } from 'src/predictions/entities/prediction.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
+import { Camera } from 'src/cameras/entity/camera.entity';
 
 @Injectable()
 export class ReportsService {
   constructor(
     @InjectRepository(Sale)
     private saleRepository: Repository<Sale>,
+    @InjectRepository(Camera)
+    private cameraRepository: Repository<Camera>,
     @InjectRepository(Prediction)
     private predictionRepository: Repository<Prediction>,
     @InjectRepository(Product)
@@ -243,20 +246,40 @@ export class ReportsService {
     startDate?: Date,
     endDate?: Date,
   ) {
-    const query = this.predictionRepository
-      .createQueryBuilder('prediction')
-      .select('prediction.result', 'estado')
-      .addSelect('COUNT(prediction.id)', 'cantidad')
-      .where('prediction.supermarketId = :supermarketId', { supermarketId });
+    const query = this.cameraRepository
+      .createQueryBuilder('camera')
+      .innerJoin('camera.category', 'category') // Relación con la categoría
+      .leftJoin('camera.predictions', 'prediction') // Relación con las predicciones
+      .select('camera.id', 'cameraId') // ID de la cámara
+      .addSelect('camera.name', 'cameraName') // Nombre de la cámara
+      .addSelect('category.name', 'categoryName') // Nombre del corte asociado
+      .addSelect(
+        `SUM(CASE WHEN prediction.result = 'Fresh' THEN 1 ELSE 0 END)`,
+        'freshCount',
+      ) // Total de Fresh
+      .addSelect(
+        `SUM(CASE WHEN prediction.result = 'Half-fresh' THEN 1 ELSE 0 END)`,
+        'halfFreshCount',
+      ) // Total de Half-fresh
+      .addSelect(
+        `SUM(CASE WHEN prediction.result = 'Spoiled' THEN 1 ELSE 0 END)`,
+        'spoiledCount',
+      ) // Total de Spoiled
+      .where('camera.supermarketId = :supermarketId', { supermarketId });
 
     if (startDate) {
       query.andWhere('prediction.createdAt >= :startDate', { startDate });
     }
+
     if (endDate) {
       query.andWhere('prediction.createdAt <= :endDate', { endDate });
     }
 
-    query.groupBy('prediction.result');
+    query
+      .groupBy('camera.id') // Agrupar por cámara
+      .addGroupBy('camera.name') // Agrupar por nombre de cámara
+      .addGroupBy('category.name'); // Agrupar por categoría asociada
+
     return query.getRawMany();
   }
 

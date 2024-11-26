@@ -44,6 +44,20 @@ export class Supermarket {
   @Column({ nullable: true })
   nit: string;
 
+  @ApiProperty({
+    example: 'Supermercado Ejemplo',
+    description: 'Razón social del supermercado',
+  })
+  @Column({ nullable: true })
+  socialReason: string;
+
+  @ApiProperty({
+    example: 1001,
+    description: 'Último número de factura generado',
+  })
+  @Column({ type: 'int', default: 0 })
+  lastInvoiceNumber: number;
+
   @OneToOne(() => Address, (address) => address.supermarket, {
     cascade: true,
     onDelete: 'CASCADE',
