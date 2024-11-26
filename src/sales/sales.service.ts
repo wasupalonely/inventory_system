@@ -127,7 +127,6 @@ export class SalesService {
     }
 
     const { supermarket } = sale;
-    console.log('DIRECCIÓN', supermarket.address);
     const {
       name: companyName,
       socialReason,
@@ -151,9 +150,10 @@ export class SalesService {
       }).format(amount);
     };
 
-    const invoiceNumber = await this.supermarketService.generateInvoiceNumber(
-      supermarket.id,
-    );
+    const responseInvoiceNumber =
+      await this.supermarketService.generateInvoiceNumber(supermarket.id);
+
+    const invoiceNumber = this.formatInvoiceNumber(responseInvoiceNumber);
 
     // Encabezado
     doc.setFont('Courier', 'bold');
@@ -198,13 +198,14 @@ export class SalesService {
     // Línea separadora
     doc.setDrawColor(0);
     doc.setLineWidth(0.5);
-    doc.line(10, detailsStartY + 20, 200, detailsStartY + 20);
+    doc.line(10, detailsStartY + 35, 200, detailsStartY + 35);
 
     // Tabla de productos
     const tableColumns = [
       { header: 'Producto', dataKey: 'product' },
       { header: 'Descripción', dataKey: 'description' },
       { header: 'Precio x Unidad', dataKey: 'pricePerUnit' },
+      { header: 'Precio x Gramo', dataKey: 'pricePerPound' },
       { header: 'Cantidad', dataKey: 'quantity' },
       { header: 'Subtotal', dataKey: 'subtotal' },
     ];
@@ -214,6 +215,7 @@ export class SalesService {
       description: item.product.description || 'N/A',
       pricePerUnit: formatCurrency(item.product.price),
       quantity: item.quantity,
+      pricePerPound: item.product.pricePerPound,
       subtotal: formatCurrency(item.product.price * item.quantity),
     }));
 
@@ -224,6 +226,14 @@ export class SalesService {
       theme: 'plain',
       styles: { font: 'Courier', fontSize: 10, cellPadding: 2 },
       headStyles: { fontStyle: 'bold' },
+      columnStyles: {
+        product: { cellWidth: 30 },
+        description: { cellWidth: 40 },
+        pricePerGram: { cellWidth: 30 }, // Definir ancho para la nueva columna
+        pricePerUnit: { cellWidth: 30 },
+        quantity: { cellWidth: 20 },
+        subtotal: { cellWidth: 40 },
+      },
     });
 
     const afterTableY = (doc as any).lastAutoTable.finalY;
@@ -233,19 +243,72 @@ export class SalesService {
     const iva = 0; // IVA (puedes calcular dinámicamente si es necesario)
     const total = subtotal + iva;
 
-    doc.text(`Subtotal: ${formatCurrency(subtotal)}`, 150, afterTableY + 10);
-    doc.text(`IVA: ${formatCurrency(iva)}`, 150, afterTableY + 15);
-    doc.text(`Total: ${formatCurrency(total)}`, 150, afterTableY + 20);
+    doc.text(
+      `                                                                Subtotal: ${formatCurrency(subtotal)}`,
+      10,
+      afterTableY + 10,
+    ); // Subtotal
+    doc.text(
+      `                                                                     IVA: ${formatCurrency(iva)}`,
+      10,
+      afterTableY + 15,
+    ); // IVA (quemado)
+    doc.text(
+      `                                                                   Total: ${formatCurrency(total)}`,
+      10,
+      afterTableY + 20,
+    ); // Total
 
     // Línea separadora
     doc.line(10, afterTableY + 25, 200, afterTableY + 25);
 
     // Información adicional
-    doc.text('GRACIAS POR SU COMPRA', 110, afterTableY + 35, {
+    doc.text('PORTAL WEB PARA FACTURA ELECTRÓNICA EN', 110, afterTableY + 35, {
       align: 'center',
     });
-    doc.text('NO SE ACEPTAN DEVOLUCIONES', 110, afterTableY + 40, {
+    doc.text(
+      'https://inventory-frontend-tau-ecru.vercel.app/',
+      110,
+      afterTableY + 40,
+      { align: 'center' },
+    );
+    doc.text('GRACIAS POR SU COMPRA', 110, afterTableY + 50, {
       align: 'center',
+    });
+    doc.text('NO SE ACEPTAN DEVOLUCIONES', 110, afterTableY + 55, {
+      align: 'center',
+    });
+
+    doc.line(10, afterTableY + 60, 200, afterTableY + 60);
+
+    // Exportar PDF
+    doc.setFontSize(6);
+    const privacyText =
+      'La información proporcionada por el cliente será tratada de acuerdo con nuestra política de privacidad. ' +
+      'Los datos se utilizarán exclusivamente para la emisión de esta factura y otros fines legales relacionados.';
+
+    doc.text(privacyText, 10, afterTableY + 65, {
+      maxWidth: 190,
+      align: 'justify',
+    });
+
+    // Texto legal adicional
+    doc.setFontSize(5);
+    const legalText =
+      'Esta factura electrónica se emite en cumplimiento de las disposiciones establecidas en el artículo 616-1 del Estatuto Tributario, ' +
+      'los artículos 615 y 617 del mismo cuerpo normativo, y el artículo 1.6.1.4.2 del Decreto 1625 de 2016, que regula la expedición de ' +
+      'facturas electrónicas y documentos equivalentes. Adicionalmente, se ajusta a lo estipulado en la Resolución 000165 de 2023, ' +
+      'que desarrolla el sistema de facturación electrónica, adoptando la versión 1.9 del anexo técnico de la factura electrónica de ' +
+      'venta, y a la Resolución 000189 de 2024, que modifica la Resolución 000165 de 2023, específicamente en los artículos 11 y 12, ' +
+      'incorporando información adicional sobre la facturación de operaciones de compra y venta de divisas y cheques de viajero. ' +
+      'Además, cumple con el parágrafo 6 del artículo 84 de la Resolución Externa 1 de 2018, modificada por la Resolución 07 de 2021, ' +
+      'que establece los requisitos para las operaciones de cambio. También se ajusta a las disposiciones de la Ley 142 de 1994 y ' +
+      'la Ley 2294 de 2023, en relación con los servicios públicos domiciliarios, y al Decreto 1697 de 2023 sobre los Gestores ' +
+      'Comunitarios. Este documento respeta las normas vigentes para garantizar la legalidad y seguridad de la transacción.';
+
+    doc.text(legalText, 10, afterTableY + 72, {
+      maxWidth: 190,
+      align: 'justify',
     });
 
     // Exportar PDF
@@ -278,6 +341,10 @@ export class SalesService {
     });
 
     return sales;
+  }
+
+  formatInvoiceNumber(number: number): string {
+    return `FV-${number.toString().padStart(5, '0')}`;
   }
 
   async getMonthlySalesDataBySupermarket(
