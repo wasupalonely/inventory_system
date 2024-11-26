@@ -48,6 +48,20 @@ export class Product {
   price: number;
 
   @ApiProperty({
+    example: 37,
+    description: 'Price of the meat product per pound (in COP)',
+  })
+  @Column({ nullable: true })
+  pricePerPound: number;
+
+  @ApiProperty({
+    example: 1000,
+    description: 'Weight of the meat product in pounds',
+  })
+  @Column({ nullable: true })
+  weight: number;
+
+  @ApiProperty({
     example: 1000,
     description:
       'Cost of the meat product per pound from the supplier (in COP)',

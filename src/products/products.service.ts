@@ -50,10 +50,7 @@ export class ProductsService {
   ): Promise<Product> {
     let category: Category | null = null;
     if (product.categoryId) {
-      category = await this.categoryService.getCategoryByIdAndSupermarketId(
-        product.categoryId,
-        product.supermarketId,
-      );
+      category = await this.categoryService.findOne(product.categoryId);
 
       if (!category) {
         throw new NotFoundException(
@@ -61,6 +58,8 @@ export class ProductsService {
         );
       }
     }
+
+    const price = product.pricePerPound * product.weight;
 
     const supermarket = await this.supermarketService.getSupermarket(
       product.supermarketId,
@@ -82,6 +81,7 @@ export class ProductsService {
       image: imageUrl,
       category,
       supermarket,
+      price,
     });
 
     return await this.productRepo.save(newProduct);
@@ -109,15 +109,15 @@ export class ProductsService {
       );
     }
 
+    const price =
+      (product.pricePerPound ?? existingProduct.pricePerPound) *
+      (product.weight ?? existingProduct.weight);
+
     const updateData = { ...product, image: imageUrl };
     delete updateData.categoryId;
 
     if (product.categoryId) {
-      const category =
-        await this.categoryService.getCategoryByIdAndSupermarketId(
-          product.categoryId,
-          existingProduct.supermarket.id,
-        );
+      const category = await this.categoryService.findOne(product.categoryId);
 
       if (!category) {
         throw new NotFoundException(
@@ -134,6 +134,7 @@ export class ProductsService {
 
     await this.productRepo.update(id, {
       ...updateData,
+      price,
       supermarket: existingProduct.supermarket,
     });
 

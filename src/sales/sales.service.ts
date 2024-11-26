@@ -152,37 +152,40 @@ doc.text(`CUFE: ${CUFE}`, 105, 25, { align: 'center' });  // Nueva línea para e
   doc.line(10, detailsStartY + 35, 200, detailsStartY + 35);
   
   // Tabla dinámica de productos
-const tableColumns = [
-  { header: 'Producto', dataKey: 'product' },
-  { header: 'Descripción', dataKey: 'description' },
-  { header: 'Precio x Unidad', dataKey: 'pricePerUnit' },
-  { header: 'Cantidad', dataKey: 'quantity' },
-  { header: 'Subtotal', dataKey: 'subtotal' },
-];
-
-const tableRows = sale.saleItems.map((item) => ({
-  product: item.product.name,
-  description: item.product.description || 'N/A',
-  pricePerUnit: formatCurrency(item.product.price),
-  quantity: item.quantity,
-  subtotal: formatCurrency(item.product.price * item.quantity),
-}));
-
-(doc as any).autoTable({
-  startY: 90,
-  columns: tableColumns,
-  body: tableRows,
-  theme: 'plain',
-  styles: { font: 'Courier', fontSize: 10, cellPadding: 2 },
-  headStyles: { fontStyle: 'bold' },
-  columnStyles: {
-    product: { cellWidth: 40 },
-    description: { cellWidth: 60 },
-    pricePerUnit: { cellWidth: 30 },
-    quantity: { cellWidth: 20 },
-    subtotal: { cellWidth: 40 },
-  },
-});
+  const tableColumns = [
+    { header: 'Producto', dataKey: 'product' },
+    { header: 'Descripción', dataKey: 'description' },
+    { header: 'Precio x Gramo', dataKey: 'pricePerGram' }, // Nueva columna
+    { header: 'Precio x Unidad', dataKey: 'pricePerUnit' },
+    { header: 'Cant', dataKey: 'quantity' },
+    { header: 'Subtotal', dataKey: 'subtotal' },
+  ];
+  
+  const tableRows = sale.saleItems.map((item) => ({
+    product: `${item.product.name} (peso) g)`, // Concatenar aquí
+    description: item.product.description || 'N/A',
+    pricePerGram: formatCurrency(0.05), // Valor quemado por ahora
+    pricePerUnit: formatCurrency(item.product.price),
+    quantity: item.quantity,
+    subtotal: formatCurrency(item.product.price * item.quantity),
+  }));
+  
+  (doc as any).autoTable({
+    startY: 90,
+    columns: tableColumns,
+    body: tableRows,
+    theme: 'plain',
+    styles: { font: 'Courier', fontSize: 10, cellPadding: 2 },
+    headStyles: { fontStyle: 'bold' },
+    columnStyles: {
+      product: { cellWidth: 30 },
+      description: { cellWidth: 40 },
+      pricePerGram: { cellWidth: 30 }, // Definir ancho para la nueva columna
+      pricePerUnit: { cellWidth: 30 },
+      quantity: { cellWidth: 20 },
+      subtotal: { cellWidth: 40 },
+    },
+  });
   
   // Línea separadora después de la tabla
   const afterTableY = (doc as any).lastAutoTable.finalY;
@@ -201,7 +204,7 @@ doc.text(`                                                                   Tot
   
   // Línea separadora antes de la información adicional
   doc.line(10, afterTableY + 25, 200, afterTableY + 25);
-  
+
   // Información adicional
   doc.text('PORTAL WEB PARA FACTURA ELECTRÓNICA EN', 110, afterTableY + 35, { align: 'center' });
   doc.text('https://inventory-frontend-tau-ecru.vercel.app/', 110, afterTableY + 40, { align: 'center' });
@@ -212,15 +215,15 @@ doc.text(`                                                                   Tot
   doc.line(10, afterTableY + 60, 200, afterTableY + 60);
   
   // Política de privacidad
-  doc.setFontSize(8);
+  doc.setFontSize(6);
   const privacyText =
     'La información proporcionada por el cliente será tratada de acuerdo con nuestra política de privacidad. ' +
     'Los datos se utilizarán exclusivamente para la emisión de esta factura y otros fines legales relacionados.';
   
-  doc.text(privacyText, 10, afterTableY + 70, { maxWidth: 190, align: 'justify' });
+  doc.text(privacyText, 10, afterTableY + 65, { maxWidth: 190, align: 'justify' });
   
   // Texto legal adicional
-  doc.setFontSize(6);
+  doc.setFontSize(5);
   const legalText = 
     'Esta factura electrónica se emite en cumplimiento de las disposiciones establecidas en el artículo 616-1 del Estatuto Tributario, ' +
     'los artículos 615 y 617 del mismo cuerpo normativo, y el artículo 1.6.1.4.2 del Decreto 1625 de 2016, que regula la expedición de ' +
@@ -233,7 +236,7 @@ doc.text(`                                                                   Tot
     'la Ley 2294 de 2023, en relación con los servicios públicos domiciliarios, y al Decreto 1697 de 2023 sobre los Gestores ' +
     'Comunitarios. Este documento respeta las normas vigentes para garantizar la legalidad y seguridad de la transacción.';
   
-  doc.text(legalText, 10, afterTableY + 90, { maxWidth: 190, align: 'justify' });
+  doc.text(legalText, 10, afterTableY + 72, { maxWidth: 190, align: 'justify' });
   
   // Exportar PDF
   const pdfData = doc.output('arraybuffer');

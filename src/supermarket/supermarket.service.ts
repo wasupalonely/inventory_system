@@ -89,7 +89,13 @@ export class SupermarketService implements OnModuleInit {
   async getSupermarket(id: number): Promise<Supermarket> {
     const supermarket = await this.supermarketRepo.findOne({
       where: { id },
-      relations: ['address', 'owner', 'categories', 'users', 'cameras'],
+      relations: [
+        'address',
+        'owner',
+        'categories',
+        'users',
+        'cameras.category',
+      ],
     });
     if (!supermarket) {
       throw new NotFoundException(`Supermercado con ID ${id} no encontrado`);
@@ -120,7 +126,7 @@ export class SupermarketService implements OnModuleInit {
           `El supermercado con ID ${supermarketId} no tiene camaras instaladas. Instala al menos una camara para activar las predicciones.`,
         );
       } else {
-        this.startOrUpdateCronJob(supermarketId);
+        await this.startOrUpdateCronJob(supermarketId);
       }
     } else {
       this.stopCronJobIfExists(supermarketId);
@@ -129,12 +135,6 @@ export class SupermarketService implements OnModuleInit {
 
   async startOrUpdateCronJob(supermarketId: number) {
     const supermarket = await this.getSupermarket(supermarketId);
-
-    if (!supermarket.cameras || supermarket.cameras.length === 0) {
-      throw new BadRequestException(
-        `El supermercado con ID ${supermarketId} no tiene cámaras instaladas. Instala al menos una cámara para activar el cronjob.`,
-      );
-    }
 
     const cronExpression = this.getCronExpression(
       supermarket.scheduleFrequency,
@@ -176,6 +176,8 @@ export class SupermarketService implements OnModuleInit {
             Math.floor(Math.random() * supermarket.cameras.length)
           ];
 
+        const cameraSection = randomCamera.category.name;
+
         const predictionToSave: PredictionResponse = predictionData[0];
         const predictionParsed: CreatePredictionDto = {
           cameraId: randomCamera.id,
@@ -204,7 +206,7 @@ export class SupermarketService implements OnModuleInit {
             predictionId: prediction.id,
             supermarketId: prediction.supermarket.id,
             title: 'Alerta de frescura en tu carne',
-            message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}, ¡Revisa tus existencias!`,
+            message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')} en tu sección de ${cameraSection}, ¡Revisa tus existencias!`,
           };
 
           const predictionDetailUrl = `${this.configService.get('CLIENT_URL')}/dashboard/predictions?predictionId=${prediction.id}`;
@@ -227,7 +229,7 @@ export class SupermarketService implements OnModuleInit {
         .format('dddd, D [de] MMMM [a las] h:mm a')
         .replace(/^\w/, (c) =>
           c.toUpperCase(),
-        )}. Por favor, revisa el estado de las existencias y toma las medidas necesarias.</p>
+        )} en tu sección de ${cameraSection}. Por favor, revisa el estado de las existencias y toma las medidas necesarias.</p>
         <p>Puedes revisar acá los detalles de la alerta <a href="${predictionDetailUrl}" style="color: #1a73e8; text-decoration: none;">Haciendo clic aquí</a></p>
       `,
           };

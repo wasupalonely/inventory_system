@@ -26,9 +26,10 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AuditModule } from './audit/audit.module';
 import { UserIdMiddleware } from './shared/middleware/user-id.middleware';
-import { UserController } from './user/user.controller';
 import { JwtService } from '@nestjs/jwt';
 import { CamerasModule } from './cameras/cameras.module';
+import { SeedService } from './seed/seed.service';
+import { Category } from './categories/entities/category.entity';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CamerasModule } from './cameras/cameras.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    TypeOrmModule.forFeature([Category]),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -74,6 +76,7 @@ import { CamerasModule } from './cameras/cameras.module';
     AppService,
     CloudinaryConfig,
     JwtService,
+    SeedService,
     // {
     //   provide: APP_GUARD,
     //   useClass: ThrottlerGuard,
