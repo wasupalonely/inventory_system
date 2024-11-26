@@ -74,6 +74,26 @@ export class SupermarketService implements OnModuleInit {
     });
   }
 
+  async generateInvoiceNumber(supermarketId: number): Promise<number> {
+    const supermarket = await this.supermarketRepo.findOne({
+      where: { id: supermarketId },
+    });
+
+    if (!supermarket) {
+      throw new NotFoundException(
+        `Supermercado con ID ${supermarketId} no encontrado.`,
+      );
+    }
+
+    // Incrementar el último número de factura
+    supermarket.lastInvoiceNumber += 1;
+
+    // Guardar el nuevo número en la base de datos
+    await this.supermarketRepo.save(supermarket);
+
+    return supermarket.lastInvoiceNumber;
+  }
+
   async findAllWithCronEnabled(): Promise<Supermarket[]> {
     const supermarkets = await this.supermarketRepo.find({
       where: { cronjobEnabled: true },
