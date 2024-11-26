@@ -22,7 +22,6 @@ export class Prediction {
 
   @ManyToOne(() => Camera, (camera) => camera.predictions, {
     onDelete: 'SET NULL',
-    nullable: true,
   })
   camera: Camera;
 

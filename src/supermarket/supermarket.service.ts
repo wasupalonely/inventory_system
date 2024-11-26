@@ -206,7 +206,15 @@ export class SupermarketService implements OnModuleInit {
             predictionId: prediction.id,
             supermarketId: prediction.supermarket.id,
             title: 'Alerta de frescura en tu carne',
-            message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')} en tu sección de ${cameraSection}, ¡Revisa tus existencias!`,
+            message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(
+              prediction.createdAt,
+            )
+              .subtract(5, 'hours')
+              .locale('es')
+              .format('dddd, D [de] MMMM [a las] h:mm a')
+              .replace(/^\w/, (c) =>
+                c.toUpperCase(),
+              )} en tu sección de ${cameraSection}, ¡Revisa tus existencias!`,
           };
 
           const predictionDetailUrl = `${this.configService.get('CLIENT_URL')}/dashboard/predictions?predictionId=${prediction.id}`;
