@@ -78,7 +78,7 @@ export class CreateSupermarketDto {
 
   @ApiProperty({ example: 'Razón social ejemplo', required: true })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   socialReason: string;
 
   @ApiProperty({ example: 1, required: true })
