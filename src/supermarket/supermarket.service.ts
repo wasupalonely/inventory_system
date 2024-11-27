@@ -155,19 +155,19 @@ export class SupermarketService implements OnModuleInit {
 
   async startOrUpdateCronJob(supermarketId: number) {
     const supermarket = await this.getSupermarket(supermarketId);
-
+  
     const cronExpression = this.getCronExpression(
       supermarket.scheduleFrequency,
       supermarket.startTime,
     );
-
+  
     this.stopCronJobIfExists(supermarketId);
-
+  
     const job = new CronJob(cronExpression, async () => {
       console.log(
         `Cronjob ejecutado para el supermercado con ID: ${supermarketId} a las ${moment().format('HH:mm:ss')}`,
       );
-
+  
       if (
         supermarket.scheduleFrequency === ScheduleFrequency.EVERY_MINUTE &&
         this.checkTestModeLimit(supermarketId)
@@ -178,7 +178,7 @@ export class SupermarketService implements OnModuleInit {
         await this.updateSupermarket(supermarketId, {
           testModeUsed: true,
         });
-
+  
         await this.updateCronStatus(
           supermarketId,
           true,
@@ -186,94 +186,104 @@ export class SupermarketService implements OnModuleInit {
         );
         return;
       }
-
+  
       try {
-        const randomImageUrl = this.getRandomImageUrl();
-        const predictionData = await this.fetchPrediction(randomImageUrl);
-
-        const randomCamera =
-          supermarket.cameras[
-            Math.floor(Math.random() * supermarket.cameras.length)
-          ];
-
-        const cameraSection = randomCamera.category.name;
-
-        const predictionToSave: PredictionResponse = predictionData[0];
-        const predictionParsed: CreatePredictionDto = {
-          cameraId: randomCamera.id,
-          image: randomImageUrl,
-          supermarketId,
-          result: predictionToSave.label,
-          fresh: predictionToSave.confidences.find(
-            (confidence) => confidence.label === 'Fresh',
-          ).confidence,
-          halfFresh: predictionToSave.confidences.find(
-            (confidence) => confidence.label === 'Half-fresh',
-          ).confidence,
-          spoiled: predictionToSave.confidences.find(
-            (confidence) => confidence.label === 'Spoiled',
-          ).confidence,
-        };
-
-        const prediction =
-          await this.predictionsService.create(predictionParsed);
-
-        if (
-          prediction.result === 'Spoiled' ||
-          prediction.result === 'Half-fresh'
-        ) {
-          const notification: CreateNotificationDto = {
-            predictionId: prediction.id,
-            supermarketId: prediction.supermarket.id,
-            title: 'Alerta de frescura en tu carne',
-            message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(
-              prediction.createdAt,
-            )
-              .subtract(5, 'hours')
-              .locale('es')
-              .format('dddd, D [de] MMMM [a las] h:mm a')
-              .replace(/^\w/, (c) =>
-                c.toUpperCase(),
-              )} en tu sección de ${cameraSection}, ¡Revisa tus existencias!`,
-          };
-
-          const predictionDetailUrl = `${this.configService.get('CLIENT_URL')}/dashboard/predictions?predictionId=${prediction.id}`;
-
-          const mailToSend: {
-            to: string;
-            subject: string;
-            text?: string;
-            html?: string;
-          } = {
-            subject: 'Alerta de frescura en tu carne',
-            to: supermarket.owner.email,
-            // text: `Notamos algo extraño en tu sección de existencias de carne el dia ${moment(prediction.createdAt).format('dddd, D [de] MMMM [a las] h:mm a')}, ¡Revisa tus existencias!`,
-            html: `<h1>Hola! ${supermarket.owner.firstName}</h1>
-      <p>Notamos que en tu sección de carnes hay algo extraño el día ${moment(
-        prediction.createdAt,
-      )
-        .subtract(5, 'hours')
-        .locale('es')
-        .format('dddd, D [de] MMMM [a las] h:mm a')
-        .replace(/^\w/, (c) =>
-          c.toUpperCase(),
-        )} en tu sección de ${cameraSection}. Por favor, revisa el estado de las existencias y toma las medidas necesarias.</p>
-        <p>Puedes revisar acá los detalles de la alerta <a href="${predictionDetailUrl}" style="color: #1a73e8; text-decoration: none;">Haciendo clic aquí</a></p>
-      `,
-          };
-          await this.notificationsService.createNotification(
-            notification,
-            mailToSend,
-          );
+        // Iterar sobre todas las cámaras asociadas al supermercado
+        for (const camera of supermarket.cameras) {
+          try {
+            const randomImageUrl = this.getRandomImageUrl();
+            console.log(`Procesando cámara: ${camera.name}, Imagen: ${randomImageUrl}`);
+  
+            const predictionData = await this.fetchPrediction(randomImageUrl);
+  
+            const cameraSection = camera.category.name;
+  
+            const predictionToSave: PredictionResponse = predictionData[0];
+            const predictionParsed: CreatePredictionDto = {
+              cameraId: camera.id,
+              image: randomImageUrl,
+              supermarketId,
+              result: predictionToSave.label,
+              fresh: predictionToSave.confidences.find(
+                (confidence) => confidence.label === 'Fresh',
+              ).confidence,
+              halfFresh: predictionToSave.confidences.find(
+                (confidence) => confidence.label === 'Half-fresh',
+              ).confidence,
+              spoiled: predictionToSave.confidences.find(
+                (confidence) => confidence.label === 'Spoiled',
+              ).confidence,
+            };
+  
+            const prediction = await this.predictionsService.create(predictionParsed);
+  
+            console.log(
+              `Predicción creada para la cámara: ${camera.name}, Resultado: ${prediction.result}`,
+            );
+  
+            if (
+              prediction.result === 'Spoiled' ||
+              prediction.result === 'Half-fresh'
+            ) {
+              const notification: CreateNotificationDto = {
+                predictionId: prediction.id,
+                supermarketId: prediction.supermarket.id,
+                title: 'Alerta de frescura en tu carne',
+                message: `Notamos algo extraño en tu sección de existencias de carne el día ${moment(
+                  prediction.createdAt,
+                )
+                  .subtract(5, 'hours')
+                  .locale('es')
+                  .format('dddd, D [de] MMMM [a las] h:mm a')
+                  .replace(/^\w/, (c) =>
+                    c.toUpperCase(),
+                  )} en tu sección de ${cameraSection}, ¡Revisa tus existencias!`,
+              };
+  
+              const predictionDetailUrl = `${this.configService.get('CLIENT_URL')}/dashboard/predictions?predictionId=${prediction.id}`;
+  
+              const mailToSend: {
+                to: string;
+                subject: string;
+                text?: string;
+                html?: string;
+              } = {
+                subject: 'Alerta de frescura en tu carne',
+                to: supermarket.owner.email,
+                html: `<h1>Hola! ${supermarket.owner.firstName}</h1>
+                <p>Notamos que en tu sección de carnes hay algo extraño el día ${moment(
+                  prediction.createdAt,
+                )
+                  .subtract(5, 'hours')
+                  .locale('es')
+                  .format('dddd, D [de] MMMM [a las] h:mm a')
+                  .replace(/^\w/, (c) =>
+                    c.toUpperCase(),
+                  )} en tu sección de ${cameraSection}. Por favor, revisa el estado de las existencias y toma las medidas necesarias.</p>
+                <p>Puedes revisar acá los detalles de la alerta <a href="${predictionDetailUrl}" style="color: #1a73e8; text-decoration: none;">Haciendo clic aquí</a></p>
+                `,
+              };
+              await this.notificationsService.createNotification(
+                notification,
+                mailToSend,
+              );
+            }
+          } catch (error) {
+            console.error(
+              `Error procesando cámara: ${camera.name}, Error: ${error.message}`,
+            );
+          }
         }
       } catch (error) {
-        console.error('Error al hacer la predicción:', error);
+        console.error('Error general en el cronjob:', error.message);
       }
     });
-
+  
     this.schedulerRegistry.addCronJob(`supermarketCron-${supermarketId}`, job);
     job.start();
   }
+  
+  
 
   private async stopCronJobIfExists(supermarketId: number) {
     const jobName = `supermarketCron-${supermarketId}`;
