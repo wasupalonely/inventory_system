@@ -198,7 +198,7 @@ export class SalesService {
     // Línea separadora
     doc.setDrawColor(0);
     doc.setLineWidth(0.5);
-    doc.line(10, detailsStartY + 35, 200, detailsStartY + 35);
+    doc.line(10, detailsStartY + 20, 200, detailsStartY + 20);
 
     // Tabla de productos
     const tableColumns = [
@@ -220,7 +220,7 @@ export class SalesService {
     }));
 
     (doc as any).autoTable({
-      startY: 70,
+      startY: 75,
       columns: tableColumns,
       body: tableRows,
       theme: 'plain',
@@ -244,19 +244,19 @@ export class SalesService {
     const total = subtotal + iva;
 
     doc.text(
-      `                                                                Subtotal: ${formatCurrency(subtotal)}`,
+      `                                                            Subtotal: ${formatCurrency(subtotal)}`,
       10,
-      afterTableY + 10,
+      afterTableY + 5,
     ); // Subtotal
     doc.text(
-      `                                                                     IVA: ${formatCurrency(iva)}`,
+      `                                                                 IVA: ${formatCurrency(iva)}`,
       10,
-      afterTableY + 15,
+      afterTableY + 10,
     ); // IVA (quemado)
     doc.text(
-      `                                                                   Total: ${formatCurrency(total)}`,
+      `                                                               Total: ${formatCurrency(total)}`,
       10,
-      afterTableY + 20,
+      afterTableY + 15,
     ); // Total
 
     // Línea separadora
